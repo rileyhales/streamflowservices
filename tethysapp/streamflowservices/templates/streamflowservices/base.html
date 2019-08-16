@@ -1,0 +1,35 @@
+{% extends "tethys_apps/app_base.html" %}
+
+{% load staticfiles %}
+{% block title %}{{ tethys_app.name }}{% endblock %}
+{% block app_icon %}<img src="{% static tethys_app.icon %}">{% endblock %}
+{% block app_title %}{{ tethys_app.name }}{% endblock %}
+
+{% block app_navigation_items %}
+  <li class="title">Services</li>
+  {% url 'streamflowservices:home' as home %}
+  {% url 'streamflowservices:map' as map %}
+  {% url 'streamflowservices:animation' as animation %}
+  {% url 'streamflowservices:api' as api %}
+  <li class="{% if request.path == home %}active{% endif %}"><a href="{{ home }}">Home</a></li>
+  <li class="{% if request.path == map %}active{% endif %}"><a href="{{ map }}">Watershed Map Viewer</a></li>
+  <li class="{% if request.path == animation %}active{% endif %}"><a href="{{ animation }}">Streamflow Animation</a></li>
+  <li class="{% if request.path == api %}active{% endif %}"><a href="{{ api }}">Access data by API</a></li>
+
+  <li class="title">Documentation</li>
+
+{% endblock %}
+
+{% block app_content %}
+{% endblock %}
+
+{% block app_actions %}
+{% endblock %}
+
+{% block content_dependent_styles %}
+  {{ block.super }}
+{% endblock %}
+
+{% block scripts %}
+  {{ block.super }}
+{% endblock %}
