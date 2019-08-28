@@ -8,10 +8,6 @@
   <div class="header-button glyphicon-button" data-toggle="tooltip" data-placement="bottom" title="View Chart">
     <a data-toggle="modal" data-target="#chart_modal"><span class="glyphicon glyphicon-globe"></span></a>
   </div>
-  <div class="header-button glyphicon-button" data-toggle="tooltip" data-placement="bottom"
-       title="Awareness Flag Settings">
-    <a data-toggle="modal" data-target="#warning_modal"><span class="glyphicon glyphicon-warning-sign"></span></a>
-  </div>
   <div class="header-button glyphicon-button" data-toggle="tooltip" data-placement="bottom" title="Search for River">
     <a data-toggle="modal" data-target="#search_modal"><span class="glyphicon glyphicon-search"></span></a>
   </div>
@@ -28,110 +24,45 @@
     <div class="modal-dialog" role="document">
       <div class="modal-content">
         <div class="modal-body">
-          <div class="alert alert-info intro_message" role="alert">
-            <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
-            Click on a river segment or search by river reach ID to view streamflow predictions.
-          </div>
-          <div id="message" class="alert alert-info hidden" role="alert"></div>
-          <div id="message-error"></div>
-          <!-- Chart Area -->
-          <div id="toggle-row">
-            {% gizmo toggle_switch units_toggle_switch %}
-          </div>
           <!-- Nav tabs -->
           <ul class="nav nav-tabs" role="tablist">
             <li role="presentation" class="active">
-              <a id="forecast_tab_link" href="#forecast_tab" aria-controls="forecast_tab" role="tab"
-                 data-toggle="tab">Forecast</a></li>
+              <a id="forecast_tab_link" href="#forecast_tab" aria-controls="forecast_tab" role="tab" data-toggle="tab">Forecast<span id="forecast-status" class="load-status"/></a></li>
             <li role="presentation">
-              <a id="historical_tab_link" href="#historical" aria-controls="historical" role="tab"
-                 data-toggle="tab">Historical</a></li>
+              <a id="historical_tab_link" href="#historical" aria-controls="historical" role="tab" data-toggle="tab">Historic Simulation<span id="historic-status" class="load-status"/></a></li>
             <li role="presentation">
-              <a id="daily_tab_link" href="#daily_season" aria-controls="daily_season" role="tab"
-                 data-toggle="tab">Daily Season</a></li>
-            <li role="presentation">
-              <a id="monthly_tab_link" href="#monthly_season" aria-controls="monthly_season"
-                 role="tab" data-toggle="tab">Monthly Season</a></li>
-            <li role="presentation">
-              <a href="#download" aria-controls="download" role="tab"
-                 data-toggle="tab">Download</a></li>
+              <a id="daily_tab_link" href="#daily_season" aria-controls="daily_season" role="tab" data-toggle="tab">Daily Average<span id="daily-status" class="load-status"/></a></li>
           </ul>
 
           <!-- Tab panes -->
           <div class="tab-content">
+            <!-- Streamflow Forecasts -->
             <div role="tabpanel" class="tab-pane active" id="forecast_tab">
               <div class="panel panel-default">
                 <div class="panel-body">
-                  <label class="long-term-select select-label hidden" for="long-term-select">ECMWF Available
-                    Dates</label>
-                  <div id="long-term-select" class="hidden long-term-select"></div>
-                  <div id="long-term-chart" class="panel-body"></div>
-                  <table id="mytable">
+                  <div id="forecast-chart"></div>
+                  <table id="forecast-table">
                     <tbody id="tbody"></tbody>
                   </table>
                 </div>
               </div>
-            </div> <!-- /.tab-pane -->
+            </div>
+            <!-- /.tab-pane treamflow Forecasts -->
+            <!-- Historical Data -->
             <div role="tabpanel" class="tab-pane" id="historical">
               <div class="panel panel-default">
                 <div class="panel-body">
-                  <div id="historical_streamflow_data" class="panel-body" style="height: 50%;">
-                    <div id="historical_message" class="alert alert-info" role="alert">
-                      <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
-                      Click on a river segment or search by river reach ID before displaying data.
-                    </div>
+                  <div id="historic-chart">
                   </div>
                 </div>
               </div>
-            </div> <!-- /.tab-pane -->
+            </div>
+            <!-- /.tab-pane Historical Data -->
+            <!-- Daily Data -->
             <div role="tabpanel" class="tab-pane" id="daily_season">
               <div class="panel panel-default">
                 <div class="panel-body">
-                  <div id="daily_streamflow_data" class="panel-body" style="height: 50%;">
-                    <div id="daily_message" class="alert alert-info" role="alert">
-                      <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
-                      Click on a river segment or search by river reach ID before displaying data.
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div> <!-- /.tab-pane -->
-            <div role="tabpanel" class="tab-pane" id="monthly_season">
-              <div class="panel panel-default">
-                <div class="panel-body">
-                  <div id="monthly_streamflow_data" class="panel-body" style="height: 50%;">
-                    <div id="monthly_message" class="alert alert-info" role="alert">
-                      <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
-                      Click on a river segment or search by river reach ID before displaying data.
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div> <!-- /.tab-pane -->
-            <div role="tabpanel" class="tab-pane" id="download">
-              <div class="panel panel-default">
-                <div class="panel-body">
-                  <div id="donwnload_message" class="alert alert-info" role="alert">
-                    <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
-                    Click on a river segment or search by river reach ID before downloading data.
-                  </div>
-                  <h6>Download Forecast Data</h6>
-                  <label class="long-term-select select-label hidden" for="download-select">ECMWF Available
-                    Dates</label>
-                  <div id="download-select" class="hidden long-term-select"></div>
-                  <div id="download_forecast" class="btn-group hidden long-term-select" role="group">
-                    <a class="btn btn-success" role="button" id="submit-download-forecast">
-                      <span class="glyphicon glyphicon-play"></span> Download Forecast
-                    </a>
-                  </div>
-                  <h6>Download ERA Interim Data</h6>
-                  <div id="download_interim" class="btn-group hidden" role="group">
-                    <a class="btn btn-warning" role="button" id="submit-download-interim-csv-daily">
-                      <span class="glyphicon glyphicon-play"></span> Download Daily Interim Data
-                    </a>
-                    <a class="btn btn-info" role="button" id="submit-download-interim-csv">
-                      <span class="glyphicon glyphicon-play"></span> Download Interim Data
-                    </a>
+                  <div id="daily-chart">
                   </div>
                 </div>
               </div>
@@ -155,7 +86,6 @@
           <h4 class="modal-title">Search by River Reach ID</h4>
         </div>
         <div class="modal-body">
-{#          {% gizmo select_input watersheds %}#}
           <div class="form-group">
             <label class="control-label" for="reach-id-input">Reach ID</label>
             <input class="form-control" id="reach-id-input" type="input">
@@ -171,50 +101,11 @@
       </div><!-- /.modal-content -->
     </div><!-- /.modal-dialog -->
   </div><!-- /.modal -->
-
-  <!-- Warning Settings Modal -->
-  <div id="warning_modal" class="modal fade" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
-                  aria-hidden="true">&times;</span></button>
-          <h4 class="modal-title">Awareness Points Control Panel</h4>
-        </div>
-        <div class="modal-body">
-          {% if warning_point_date_select %}
-            <div id="message_warning_points" class="alert alert-info row hidden" role="alert">
-              <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
-              Loading warning points. Please wait ...
-            </div>
-            <div id="warning_input_area">
-              {% gizmo select_input warning_point_date_select %}
-              <div id="warning-date-slider-range"></div>
-              <span class="warning-val" id="warning-start"></span>
-              <span style="font: 700 12px Arial;"> to </span>
-              <span class="warning-val" id="warning-end"></span>
-            </div>
-          {% else %}
-            <div id="message_warning_points" class="alert alert-danger" role="alert">
-              <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-              No forecasts found.
-            </div>
-          {% endif %}
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        </div>
-      </div><!-- /.modal-content -->
-    </div><!-- /.modal-dialog -->
-  </div><!-- /.modal -->
 {% endblock %}
 
 {% block styles %}
   {{ block.super }}
   <link type="text/css" rel="stylesheet" href="https://unpkg.com/leaflet@1.5.1/dist/leaflet.css">
-
-  <link type="text/css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/13.1.5/nouislider.min.css">
-  <link type="text/css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.7/css/select2.min.css">
 
   <link type="text/css" rel="stylesheet" href="{% static 'streamflowservices/css/map.css' %}">
 {% endblock %}
@@ -227,10 +118,7 @@
   </script>
   <script type="text/javascript" src="https://unpkg.com/leaflet@1.5.1/dist/leaflet.js"></script>
   <script src="https://unpkg.com/esri-leaflet@2.2.3/dist/esri-leaflet.js"></script>
-
-  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/wnumb/1.1.0/wNumb.min.js"></script>
-  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/13.1.5/nouislider.min.js"></script>
-  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.7/js/select2.full.min.js"></script>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 
   <script type="text/javascript" src="{% static 'streamflowservices/js/map.js' %}"></script>
 {% endblock %}

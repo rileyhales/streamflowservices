@@ -1,5 +1,7 @@
 {% extends "tethys_apps/app_base.html" %}
 
+{% load tethys_gizmos %}
+{% load tethys_gizmos staticfiles %}
 {% load staticfiles %}
 {% block title %}{{ tethys_app.name }}{% endblock %}
 {% block app_icon %}<img src="{% static tethys_app.icon %}">{% endblock %}
@@ -16,7 +18,11 @@
   <li class="{% if request.path == animation %}active{% endif %}"><a href="{{ animation }}">Streamflow Animation</a></li>
   <li class="{% if request.path == api %}active{% endif %}"><a href="{{ api }}">Access data by API</a></li>
 
-  <li class="title">Documentation</li>
+
+  {% if request.path == map %}
+    <li class="title">Map Controls</li>
+    {% gizmo select_input watersheds_select_input %}
+  {% endif %}
 
 {% endblock %}
 
