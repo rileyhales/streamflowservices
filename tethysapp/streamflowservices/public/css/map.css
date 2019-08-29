@@ -68,11 +68,6 @@
     margin: 15px 0;
 }
 
-.charts {
-    width: 100%;
-    height: 500px;
-}
-
 .load-status {
     text-align: center;
     font-weight: bold;
@@ -91,4 +86,9 @@
 
 .legend:hover {
     background: rgba(255, 255, 255, 0.9);
+}
+
+#forecast-chart, #historic-chart, #daily-chart {
+    width: 100%;
+    height: 100%;
 }

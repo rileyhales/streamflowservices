@@ -51,6 +51,16 @@ function getWatershedComponent(layername) {
         opacity: 1,
     })
 }
+let boundary_layer;
+let catchment_layer;
+let drainage_layer;
+
+let querylat = null;
+let querylon = null;
+let needsRefresh = {};
+
+let listlayers = [];
+let ctrllayers = {};
 ////////////////////////////////////////////////////////////////////////  SETUP THE MAP
 let mapObj = map();
 let basemapObj = basemaps();
@@ -61,25 +71,38 @@ latlon.addTo(mapObj);
 let endpoint = 'http://global-streamflow-prediction.eastus.azurecontainer.io/api/';
 let watersheds = JSON.parse($("#map").attr('watersheds'))['list'];
 
-let boundary_layer;
-let catchment_layer;
-let drainage_layer;
-let listlayers = [];
-let ctrllayers = {};
-
 showBoundaryLayers();
 
 ////////////////////////////////////////////////////////////////////////  EVENT LISTENERS
 let startzoom;
 let bc_threshold = 6;
 let cd_threshold = 8;
+$("#forecast_tab_link").on('click', function () {
+    askAPI('ForecastStats')
+});
+$("#historical_tab_link").on('click', function () {
+    askAPI('HistoricSimulation')
+});
+$("#daily_tab_link").on('click', function () {
+    askAPI('SeasonalAverage')
+});
 mapObj.on("click", function (event) {
     if (mapObj.getZoom() >= cd_threshold) {
+        querylat = event.latlng.lat;
+        querylon = event.latlng.lng;
+        needsRefresh = {'ForecastStats': true, 'HistoricSimulation': true, 'SeasonalAverage': true};
+        let status_divs = [$("#forecast-status"), $("#historic-status"), $("#daily-status")];
+        let chart_divs = [$("#forecast-chart"), $("#historic-chart"), $("#daily-chart")];
+        for (let i in status_divs) {
+            status_divs[i].html(' (cleared)');
+            status_divs[i].css('color', 'grey');
+        }
+        for (let i in chart_divs) {
+            chart_divs[i].html('')
+        }
         $("#chart_modal").modal('show');
-        askAPI('ForecastStats', event.latlng.lat, event.latlng.lng);
-        // askAPI('ForecastEnsembles', event.latlng.lat, event.latlng.lng);
-        askAPI('HistoricSimulation', event.latlng.lat, event.latlng.lng);
-        askAPI('SeasonalAverage', event.latlng.lat, event.latlng.lng);
+        $("#forecast_tab").tab('show');
+        askAPI('ForecastStats');
     }
 });
 mapObj.on("mousemove", function (event) {
@@ -138,49 +161,50 @@ $("#watersheds_select_input").change(function () {
     mapObj.setMaxZoom(12);
 });
 
-////////////////////////////////////////////////////////////////////////  GET CHART DATA BY AJAX
-function titleCase(str) {
-    str = str.toLowerCase().split('_');
-    for (let i = 0; i < str.length; i++) {
-        str[i] = str[i].charAt(0).toUpperCase() + str[i].slice(1);
-    }
-    return str.join(' ');
-}
-
-function askAPI(method, lat, lon) {
+////////////////////////////////////////////////////////////////////////  GET DATA FROM API
+function askAPI(method) {
+    if (!querylat && !querylon) {return}
+    else if (!needsRefresh[method]) {return}
     console.log('started ' + method);
-    let div;
-    let status;
+    let div, status, charttab;
     if (method.includes('Forecast')) {
         div = $("#forecast-chart");
-        status = $("#forecast-status")
+        status = $("#forecast-status");
+        charttab = $("#forecast_tab");
     } else if (method.includes('Historic')) {
         div = $("#historic-chart");
-        status = $("#historic-status")
+        status = $("#historic-status");
+        charttab = $("#historic_tab");
     } else if (method.includes('Season')) {
         div = $("#daily-chart");
-        status = $("#daily-status")
+        status = $("#daily-status");
+        charttab = $("#daily_tab");
     }
     div.html('<img src="https://www.ashland.edu/sites/all/themes/ashlandecard/2014card/images/load.gif">');
     div.css('text-align', 'center');
     status.html(' (loading)');
-    status.css('color', 'yellow');
+    status.css('color', 'orange');
+    needsRefresh[method] = false;
     $.ajax({
         type: 'GET',
         async: true,
-        url: '/apps/streamflowservices/query' + L.Util.getParamString({method: method, region: $("#watersheds_select_input").val(), lat: lat, lon: lon}),
+        url: '/apps/streamflowservices/query' + L.Util.getParamString({method: method, region: $("#watersheds_select_input").val(), lat: querylat, lon: querylon}),
+        complete: function () {
+            $("#chart_modal").modal('show');
+        },
         success: function (plot) {
             console.log('success ' + method);
-            div.attr('class', 'charts');
-            div.html(plot['data']);
+            charttab.tab('show');
             status.html(' (ready)');
             status.css('color', 'green');
+            div.html(plot['data']);
         },
         error: function () {
             console.log('error ' + method);
             div.html('');
             status.html(' (failed)');
             status.css('color', 'red');
+            needsRefresh[method] = true;
         }
     })
 }
