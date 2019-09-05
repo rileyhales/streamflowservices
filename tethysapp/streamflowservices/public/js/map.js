@@ -146,6 +146,7 @@ mapObj.on("click", function (event) {
         if (marker) {mapObj.removeLayer(marker)}
         reachid = drainage_layer.GetFeatureInfo(event);
         marker = L.marker(event.latlng).addTo(mapObj);
+        marker.bindPopup('<b>Watershed/Region:</b> ' + $("#watersheds_select_input").val() + '<br><b>Reach ID:</b> ' + reachid);
         needsRefresh = {'ForecastStats': true, 'HistoricSimulation': true, 'SeasonalAverage': true};
         let status_divs = [$("#forecast-status"), $("#historic-status"), $("#daily-status")];
         let chart_divs = [$("#forecast-chart"), $("#historic-chart"), $("#daily-chart")];
