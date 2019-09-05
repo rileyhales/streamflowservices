@@ -71,8 +71,7 @@ def api(request):
 def query(request):
     data = request.GET
     method = data['method']
-    # params = {'region': data['region'], 'lat': float(data['lat']), 'lon': float(data['lon']), 'return_format': 'csv'}
-    params = {'region': 'africa-continental', 'reach_id': 125180, 'return_format': 'csv'}
+    params = {'region': data['region'], 'reach_id': data['reachid'], 'return_format': 'csv'}
     endpoint = 'http://global-streamflow-prediction.eastus.azurecontainer.io/api/'
     asdf = pandas.read_csv(StringIO(requests.get(endpoint + method, params=params).text))
     if 'Forecast' in method:
@@ -122,7 +121,7 @@ def query(request):
         )
         tmp = asdf[['datetime', 'high_res (m3/s)']].dropna(axis=0)
         hires = Scatter(
-            name='HRES',
+            name='Higher Resolution',
             x=list(tmp['datetime']),
             y=list(tmp['high_res (m3/s)']),
             line={'color': 'black'}

@@ -1,3 +1,50 @@
+////////////////////////////////////////////////////////////////////////  WEB MAPPING FEATURE SERVICE EXTENSION
+L.TileLayer.WMFS = L.TileLayer.WMS.extend({
+    GetFeatureInfo: function (evt) {
+        // Construct a GetFeatureInfo request URL given a point
+        let size = this._map.getSize();
+        let params = {
+            request: 'GetFeatureInfo',
+            service: 'WMS',
+            srs: 'EPSG:4326',
+            version: this.wmsParams.version,
+            format: this.wmsParams.format,
+            bbox: this._map.getBounds().toBBoxString(),
+            height: size.y,
+            width: size.x,
+            layers: this.wmsParams.layers,
+            query_layers: this.wmsParams.layers,
+            info_format: 'application/json',
+            buffer: 25,
+        };
+        params[params.version === '1.3.0' ? 'i' : 'x'] = evt.containerPoint.x;
+        params[params.version === '1.3.0' ? 'j' : 'y'] = evt.containerPoint.y;
+
+        let url = this._url + L.Util.getParamString(params, this._url, true);
+        console.log(url);
+        let reachid = null;
+
+        if (url) {
+            $.ajax({
+                async: false,
+                type: "GET",
+                url: url,
+                info_format: 'application/json',
+                success: function (data) {
+                    reachid = data.features[0].properties['COMID'];
+                    console.log(reachid);
+                }
+            });
+        }
+        return reachid
+    },
+});
+
+L.tileLayer.WMFS = function (url, options) {
+    return new L.TileLayer.WMFS(url, options);
+};
+
+
 ////////////////////////////////////////////////////////////////////////  MAP FUNCTIONS AND VARIABLES
 function map() {
     return L.map('map', {
@@ -51,25 +98,33 @@ function getWatershedComponent(layername) {
         opacity: 1,
     })
 }
+function getDrainageLine(layername) {
+    return L.tileLayer.WMFS(gsURL, {
+        version: '1.1.0',
+        layers: gsWRKSP + ':' + layername,
+        useCache: true,
+        crossOrigin: false,
+        format: 'image/png',
+        transparent: true,
+        opacity: 1,
+    })
+}
+let reachid;
+let needsRefresh = {};
+
+let watersheds = JSON.parse($("#map").attr('watersheds'))['list'];
+let listlayers = [];
+let ctrllayers = {};
 let boundary_layer;
 let catchment_layer;
 let drainage_layer;
-
-let querylat = null;
-let querylon = null;
-let needsRefresh = {};
-
-let listlayers = [];
-let ctrllayers = {};
+let marker = null;
 ////////////////////////////////////////////////////////////////////////  SETUP THE MAP
 let mapObj = map();
 let basemapObj = basemaps();
 let controlsObj;
 legend.addTo(mapObj);
 latlon.addTo(mapObj);
-
-let endpoint = 'http://global-streamflow-prediction.eastus.azurecontainer.io/api/';
-let watersheds = JSON.parse($("#map").attr('watersheds'))['list'];
 
 showBoundaryLayers();
 
@@ -88,8 +143,9 @@ $("#daily_tab_link").on('click', function () {
 });
 mapObj.on("click", function (event) {
     if (mapObj.getZoom() >= cd_threshold) {
-        querylat = event.latlng.lat;
-        querylon = event.latlng.lng;
+        if (marker) {mapObj.removeLayer(marker)}
+        reachid = drainage_layer.GetFeatureInfo(event);
+        marker = L.marker(event.latlng).addTo(mapObj);
         needsRefresh = {'ForecastStats': true, 'HistoricSimulation': true, 'SeasonalAverage': true};
         let status_divs = [$("#forecast-status"), $("#historic-status"), $("#daily-status")];
         let chart_divs = [$("#forecast-chart"), $("#historic-chart"), $("#daily-chart")];
@@ -151,19 +207,19 @@ $("#watersheds_select_input").change(function () {
 
     boundary_layer = getWatershedComponent(waterselect + '-boundary').addTo(mapObj);
     catchment_layer = getWatershedComponent(waterselect + '-catchment');
-    drainage_layer = getWatershedComponent(waterselect + '-drainageline');
+    drainage_layer = getDrainageLine(waterselect + '-drainageline');
     ctrllayers = {
         'Watershed Boundary': boundary_layer,
         'Catchment Boundaries': catchment_layer,
         'Drainage Lines': drainage_layer,
     };
     controlsObj = L.control.layers(basemapObj, ctrllayers).addTo(mapObj);
-    mapObj.setMaxZoom(12);
+    mapObj.setMaxZoom(9);
 });
 
 ////////////////////////////////////////////////////////////////////////  GET DATA FROM API
 function askAPI(method) {
-    if (!querylat && !querylon) {return}
+    if (!reachid) {return}
     else if (!needsRefresh[method]) {return}
     console.log('started ' + method);
     let div, status, charttab;
@@ -188,12 +244,10 @@ function askAPI(method) {
     $.ajax({
         type: 'GET',
         async: true,
-        url: '/apps/streamflowservices/query' + L.Util.getParamString({method: method, region: $("#watersheds_select_input").val(), lat: querylat, lon: querylon}),
-        complete: function () {
-            $("#chart_modal").modal('show');
-        },
+        url: '/apps/streamflowservices/query' + L.Util.getParamString({method: method, region: $("#watersheds_select_input").val(), reachid: reachid}),
         success: function (plot) {
             console.log('success ' + method);
+            $("#chart_modal").modal('show');
             charttab.tab('show');
             status.html(' (ready)');
             status.css('color', 'green');
