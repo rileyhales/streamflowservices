@@ -10,6 +10,7 @@ from tethys_sdk.gizmos import SelectInput
 from io import StringIO
 from plotly.offline import plot as offplot
 from plotly.graph_objs import Scatter, Scattergl, Layout, Figure
+import plotly.graph_objs as go
 
 from .options import watersheds_db
 from .app import Streamflowservices as App
@@ -75,18 +76,32 @@ def query(request):
     data = request.GET
     method = data['method']
     params = {'region': data['region'], 'reach_id': data['reachid'], 'return_format': 'csv'}
+    # params = {'region': 'africa-continental', 'reach_id': 131655, 'return_format': 'csv'}
     endpoint = 'http://global-streamflow-prediction.eastus.azurecontainer.io/api/'
-    asdf = pandas.read_csv(StringIO(requests.get(endpoint + method, params=params).text))
+    data = pandas.read_csv(StringIO(requests.get(endpoint + method, params=params).text))
+
     if 'Forecast' in method:
-        tmp = asdf[['datetime', 'mean (m3/s)']].dropna(axis=0)
+        tmp = data[['datetime']]
+        startdate = tmp.iloc[0][0]
+        enddate = tmp.iloc[-1][0]
+
+        returns = pandas.read_csv(
+            StringIO(requests.get(endpoint + 'ReturnPeriods', params=params).text), index_col='return period')
+        r2 = returns.iloc[3][0]
+        r10 = returns.iloc[2][0]
+        r20 = returns.iloc[1][0]
+        # ensemble = pandas.read_csv(
+        #     StringIO(requests.get(endpoint + 'ForecastEnsembles', params=params).text), index_col='datetime')
+
+        tmp = data[['datetime', 'mean (m3/s)']].dropna(axis=0)
         meanplot = Scatter(
             name='Mean',
             x=list(tmp['datetime']),
             y=list(tmp['mean (m3/s)']),
             line=dict(color='blue'),
         )
-        tmp = asdf[['datetime', 'max (m3/s)']].dropna(axis=0)
-        rangemax = max(asdf['max (m3/s)'])
+        tmp = data[['datetime', 'max (m3/s)']].dropna(axis=0)
+        rangemax = max(data['max (m3/s)'])
         maxplot = Scatter(
             name='Max',
             x=list(tmp['datetime']),
@@ -95,7 +110,7 @@ def query(request):
             mode='lines',
             line=dict(color='rgb(152, 251, 152)', width=0)
         )
-        tmp = asdf[['datetime', 'min (m3/s)']].dropna(axis=0)
+        tmp = data[['datetime', 'min (m3/s)']].dropna(axis=0)
         minplot = Scatter(
             name='Min',
             x=list(tmp['datetime']),
@@ -104,7 +119,7 @@ def query(request):
             mode='lines',
             line=dict(color='rgb(152, 251, 152)')
         )
-        tmp = asdf[['datetime', 'std_dev_range_lower (m3/s)']].dropna(axis=0)
+        tmp = data[['datetime', 'std_dev_range_lower (m3/s)']].dropna(axis=0)
         stdlow = Scatter(
             name='Std. Dev. Lower',
             x=list(tmp['datetime']),
@@ -113,7 +128,7 @@ def query(request):
             mode='lines',
             line=dict(color='rgb(152, 251, 152)', width=0)
         )
-        tmp = asdf[['datetime', 'std_dev_range_upper (m3/s)']].dropna(axis=0)
+        tmp = data[['datetime', 'std_dev_range_upper (m3/s)']].dropna(axis=0)
         stdup = Scatter(
             name='Std. Dev. Upper',
             x=list(tmp['datetime']),
@@ -122,7 +137,7 @@ def query(request):
             mode='lines',
             line={'width': 0, 'color': 'rgb(34, 139, 34)'}
         )
-        tmp = asdf[['datetime', 'high_res (m3/s)']].dropna(axis=0)
+        tmp = data[['datetime', 'high_res (m3/s)']].dropna(axis=0)
         hires = Scatter(
             name='Higher Resolution',
             x=list(tmp['datetime']),
@@ -136,6 +151,38 @@ def query(request):
                 'title': 'Streamflow (m<sup>3</sup>/s)',
                 'range': [0, 1.2 * rangemax]
             },
+            shapes=[
+                go.layout.Shape(
+                    type='rect',
+                    x0=startdate,
+                    x1=enddate,
+                    y0=r2,
+                    y1=r10,
+                    line={'width': 0},
+                    opacity=.4,
+                    fillcolor='yellow'
+                ),
+                go.layout.Shape(
+                    type='rect',
+                    x0=startdate,
+                    x1=enddate,
+                    y0=r10,
+                    y1=r20,
+                    line={'width': 0},
+                    opacity=.4,
+                    fillcolor='red'
+                ),
+                go.layout.Shape(
+                    type='rect',
+                    x0=startdate,
+                    x1=enddate,
+                    y0=r20,
+                    y1=1.2 * rangemax,
+                    line={'width': 0},
+                    opacity=.4,
+                    fillcolor='purple'
+                ),
+            ]
         )
         plotdiv = offplot(
             Figure([minplot, meanplot, maxplot, stdlow, stdup, hires], layout=layout),
@@ -145,6 +192,16 @@ def query(request):
         )
         return JsonResponse({'data': plotdiv})
     elif 'Historic' in method:
+        returns = pandas.read_csv(
+            StringIO(requests.get(endpoint + 'ReturnPeriods', params=params).text), index_col='return period')
+        r2 = returns.iloc[3][0]
+        r10 = returns.iloc[2][0]
+        r20 = returns.iloc[1][0]
+
+        dates = data['datetime'].tolist()
+        startdate = dates[0]
+        enddate = dates[-1]
+
         layout = Layout(
             title='Historic Streamflow Simulation',
             xaxis={
@@ -154,18 +211,60 @@ def query(request):
             },
             yaxis={
                 'title': 'Streamflow (m<sup>3</sup>/s)',
-                'range': [0, 1.2 * max(asdf['streamflow (m3/s)'])]
+                'range': [0, 1.2 * max(data['streamflow (m3/s)'])]
             },
+            shapes=[
+                go.layout.Shape(
+                    type='rect',
+                    x0=startdate,
+                    x1=enddate,
+                    y0=r2,
+                    y1=r10,
+                    line={'width': 0},
+                    opacity=.4,
+                    fillcolor='yellow'
+                ),
+                # go.layout.Shape(
+                #     type='line',
+                #     x0=startdate,
+                #     x1=enddate,
+                #     y0=r2,
+                #     y1=r2,
+                #     line={'color': 'black', 'width': 3, 'dash': 'dashdot'},
+                #     opacity=.4,
+                #     fillcolor='yellow'
+                # ),
+                go.layout.Shape(
+                    type='rect',
+                    x0=startdate,
+                    x1=enddate,
+                    y0=r10,
+                    y1=r20,
+                    line={'width': 0},
+                    opacity=.4,
+                    fillcolor='red'
+                ),
+                go.layout.Shape(
+                    type='rect',
+                    x0=startdate,
+                    x1=enddate,
+                    y0=r20,
+                    y1=1.2 * 1.2 * max(data['streamflow (m3/s)']),
+                    line={'width': 0},
+                    opacity=.4,
+                    fillcolor='purple'
+                ),
+            ]
         )
         plotdiv = offplot(
-            Figure([Scattergl(x=asdf['datetime'].tolist(), y=asdf['streamflow (m3/s)'].tolist())], layout=layout),
+            Figure([Scattergl(x=dates, y=data['streamflow (m3/s)'].tolist())], layout=layout),
             config={'autosizable': True, 'responsive': True},
             output_type='div',
             include_plotlyjs=False
         )
         return JsonResponse({'data': plotdiv})
     else:  # 'Season' in method:
-        asdf['day'] = pandas.to_datetime(asdf['day'] + 1, format='%j')
+        data['day'] = pandas.to_datetime(data['day'] + 1, format='%j')
         layout = Layout(
             title='Daily Average Streamflow (Historic Simulation)',
             xaxis={
@@ -175,11 +274,11 @@ def query(request):
             },
             yaxis={
                 'title': 'Streamflow (m<sup>3</sup>/s)',
-                'range': [0, 1.2 * max(asdf['streamflow_avg (m3/s)'])]
+                'range': [0, 1.2 * max(data['streamflow_avg (m3/s)'])]
             },
         )
         plotdiv = offplot(
-            Figure([Scatter(x=asdf['day'].tolist(), y=asdf['streamflow_avg (m3/s)'].tolist())], layout=layout),
+            Figure([Scatter(x=data['day'].tolist(), y=data['streamflow_avg (m3/s)'].tolist())], layout=layout),
             config={'autosizable': True, 'responsive': True},
             output_type='div',
             include_plotlyjs=False
