@@ -28,6 +28,16 @@ class Streamflowservices(TethysAppBase):
                 controller='streamflowservices.controllers.home'
             ),
             UrlMap(
+                name='methods',
+                url='streamflowservices/methods',
+                controller='streamflowservices.controllers.methods'
+            ),
+            UrlMap(
+                name='tutorial',
+                url='streamflowservices/tutorial',
+                controller='streamflowservices.controllers.tutorial'
+            ),
+            UrlMap(
                 name='animation',
                 url='streamflowservices/animation',
                 controller='streamflowservices.controllers.animation'

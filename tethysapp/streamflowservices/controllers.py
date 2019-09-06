@@ -17,21 +17,17 @@ from .app import Streamflowservices as App
 
 @login_required()
 def home(request):
-    """
-    Controller for the app home page.
-    """
-    context = {}
-
-    return render(request, 'streamflowservices/home.html', context)
+    return render(request, 'streamflowservices/home.html', {})
 
 
 @login_required()
-def animation(request):
-    """
-    Controller for the streamflow animation page.
-    """
-    context = {}
-    return render(request, 'streamflowservices/animationmap.html', context)
+def methods(request):
+    return render(request, 'streamflowservices/methods.html', {})
+
+
+@login_required()
+def tutorial(request):
+    return render(request, 'streamflowservices/tutorial.html', {})
 
 
 @login_required()
@@ -63,9 +59,16 @@ def map(request):
 
 
 @login_required()
+def animation(request):
+    """
+    Controller for the streamflow animation page.
+    """
+    return render(request, 'streamflowservices/animationmap.html', {})
+
+
+@login_required()
 def api(request):
-    context = {}
-    return render(request, 'streamflowservices/api.html', context)
+    return render(request, 'streamflowservices/api.html', {})
 
 
 def query(request):
