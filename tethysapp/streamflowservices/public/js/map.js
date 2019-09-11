@@ -219,6 +219,7 @@ $("#watersheds_select_input").change(function () {
 });
 
 ////////////////////////////////////////////////////////////////////////  GET DATA FROM API
+let holding;
 function askAPI(method) {
     if (!reachid) {return}
     else if (!needsRefresh[method]) {return}
@@ -247,6 +248,7 @@ function askAPI(method) {
         async: true,
         url: '/apps/streamflowservices/query' + L.Util.getParamString({method: method, region: $("#watersheds_select_input").val(), reachid: reachid}),
         success: function (data) {
+            holding = data;
             console.log('success ' + method);
             $("#chart_modal").modal('show');
             charttab.tab('show');

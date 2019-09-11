@@ -93,8 +93,9 @@ def query(request):
             StringIO(requests.get(endpoint + 'ForecastEnsembles', params=params).text), index_col='datetime')
         ensemble.index = pandas.to_datetime(ensemble.index)
 
-        # Build the ensemble stat table- iterate over each day and then over each ensemble
-        for i in range(len(uniqueday) - 1):  # ommiting the extra day used for reference only
+        # Build the ensemble stat table- iterate over each day and then over each ensemble.
+        returntable = {'r2': [], 'r10': [], 'r20': []}
+        for i in range(len(uniqueday) - 1):  # (-1) omit the extra day used for reference only
             tmp = ensemble.loc[uniqueday[i]:uniqueday[i + 1]]
             num2 = 0
             num10 = 0
@@ -109,6 +110,9 @@ def query(request):
                     num2 += 1
                 elif any(i > r2 for i in tmp[column].to_numpy()):
                     num2 += 1
+            returntable['r2'].append(round(num2 * 100 / 52, 2))
+            returntable['r10'].append(round(num10 * 100 / 52, 2))
+            returntable['r20'].append(round(num20 * 100 / 52, 2))
 
         tmp = data[['datetime', 'mean (m3/s)']].dropna(axis=0)
         meanplot = Scatter(
@@ -207,7 +211,7 @@ def query(request):
             output_type='div',
             include_plotlyjs=False
         )
-        return JsonResponse({'plot': plotdiv, 'table': 'tabledict'})
+        return JsonResponse({'plot': plotdiv, 'table': returntable})
     elif 'Historic' in method:
         returns = pandas.read_csv(
             StringIO(requests.get(endpoint + 'ReturnPeriods', params=params).text), index_col='return period')
