@@ -1,6 +1,7 @@
 import json
 import requests
 import pandas
+import datetime
 
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
@@ -33,9 +34,6 @@ def tutorial(request):
 
 @login_required()
 def map(request):
-    """
-    Controller for the map viewer page.
-    """
     sds = App.get_spatial_dataset_service('geoserver', as_wms=True)
     workspace = App.get_custom_setting('geoserver_workspace')
     url = sds.replace('wms', workspace + '/wms')
@@ -61,9 +59,6 @@ def map(request):
 
 @login_required()
 def animation(request):
-    """
-    Controller for the streamflow animation page.
-    """
     return render(request, 'streamflowservices/animationmap.html', {})
 
 
@@ -75,23 +70,45 @@ def api(request):
 def query(request):
     data = request.GET
     method = data['method']
-    params = {'region': data['region'], 'reach_id': data['reachid'], 'return_format': 'csv'}
-    # params = {'region': 'africa-continental', 'reach_id': 131655, 'return_format': 'csv'}
+    # params = {'region': data['region'], 'reach_id': data['reachid'], 'return_format': 'csv'}
+    params = {'region': 'africa-continental', 'reach_id': 131655, 'return_format': 'csv'}
     endpoint = 'http://global-streamflow-prediction.eastus.azurecontainer.io/api/'
     data = pandas.read_csv(StringIO(requests.get(endpoint + method, params=params).text))
-
     if 'Forecast' in method:
+        # get the start/end date and date range
         tmp = data[['datetime']]
         startdate = tmp.iloc[0][0]
         enddate = tmp.iloc[-1][0]
-
+        start_datetime = datetime.datetime.strptime(startdate, "%Y-%m-%d %H:00:00")
+        span = datetime.datetime.strptime(enddate, "%Y-%m-%d %H:00:00") - start_datetime
+        uniqueday = [start_datetime + datetime.timedelta(days=i) for i in range(span.days + 2)]
+        # get the return periods for the stream reach
         returns = pandas.read_csv(
             StringIO(requests.get(endpoint + 'ReturnPeriods', params=params).text), index_col='return period')
         r2 = returns.iloc[3][0]
         r10 = returns.iloc[2][0]
         r20 = returns.iloc[1][0]
-        # ensemble = pandas.read_csv(
-        #     StringIO(requests.get(endpoint + 'ForecastEnsembles', params=params).text), index_col='datetime')
+        # get the ensemble distribution for the stream reach
+        ensemble = pandas.read_csv(
+            StringIO(requests.get(endpoint + 'ForecastEnsembles', params=params).text), index_col='datetime')
+        ensemble.index = pandas.to_datetime(ensemble.index)
+
+        # Build the ensemble stat table- iterate over each day and then over each ensemble
+        for i in range(len(uniqueday) - 1):  # ommiting the extra day used for reference only
+            tmp = ensemble.loc[uniqueday[i]:uniqueday[i + 1]]
+            num2 = 0
+            num10 = 0
+            num20 = 0
+            for column in tmp:
+                if any(i > r20 for i in tmp[column].to_numpy()):
+                    num2 += 1
+                    num10 += 1
+                    num20 += 1
+                elif any(i > r10 for i in tmp[column].to_numpy()):
+                    num10 += 1
+                    num2 += 1
+                elif any(i > r2 for i in tmp[column].to_numpy()):
+                    num2 += 1
 
         tmp = data[['datetime', 'mean (m3/s)']].dropna(axis=0)
         meanplot = Scatter(
@@ -190,7 +207,7 @@ def query(request):
             output_type='div',
             include_plotlyjs=False
         )
-        return JsonResponse({'data': plotdiv})
+        return JsonResponse({'plot': plotdiv, 'table': 'tabledict'})
     elif 'Historic' in method:
         returns = pandas.read_csv(
             StringIO(requests.get(endpoint + 'ReturnPeriods', params=params).text), index_col='return period')
@@ -224,16 +241,6 @@ def query(request):
                     opacity=.4,
                     fillcolor='yellow'
                 ),
-                # go.layout.Shape(
-                #     type='line',
-                #     x0=startdate,
-                #     x1=enddate,
-                #     y0=r2,
-                #     y1=r2,
-                #     line={'color': 'black', 'width': 3, 'dash': 'dashdot'},
-                #     opacity=.4,
-                #     fillcolor='yellow'
-                # ),
                 go.layout.Shape(
                     type='rect',
                     x0=startdate,
@@ -262,7 +269,7 @@ def query(request):
             output_type='div',
             include_plotlyjs=False
         )
-        return JsonResponse({'data': plotdiv})
+        return JsonResponse({'plot': plotdiv})
     else:  # 'Season' in method:
         data['day'] = pandas.to_datetime(data['day'] + 1, format='%j')
         layout = Layout(
@@ -283,4 +290,4 @@ def query(request):
             output_type='div',
             include_plotlyjs=False
         )
-        return JsonResponse({'data': plotdiv})
+        return JsonResponse({'plot': plotdiv})

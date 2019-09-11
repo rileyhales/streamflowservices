@@ -246,13 +246,14 @@ function askAPI(method) {
         type: 'GET',
         async: true,
         url: '/apps/streamflowservices/query' + L.Util.getParamString({method: method, region: $("#watersheds_select_input").val(), reachid: reachid}),
-        success: function (plot) {
+        success: function (data) {
             console.log('success ' + method);
             $("#chart_modal").modal('show');
             charttab.tab('show');
             status.html(' (ready)');
             status.css('color', 'green');
-            div.html(plot['data']);
+            div.html(data['plot']);
+            $("#return_period_table").html(data['tablediv'])
         },
         error: function () {
             console.log('error ' + method);
