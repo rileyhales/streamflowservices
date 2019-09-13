@@ -219,16 +219,17 @@ $("#watersheds_select_input").change(function () {
 });
 
 ////////////////////////////////////////////////////////////////////////  GET DATA FROM API
-let holding;
 function askAPI(method) {
     if (!reachid) {return}
     else if (!needsRefresh[method]) {return}
     console.log('started ' + method);
     let div, status, charttab;
+    let table = $("#forecast-table");
     if (method.includes('Forecast')) {
         div = $("#forecast-chart");
         status = $("#forecast-status");
         charttab = $("#forecast_tab");
+        table.html('');
     } else if (method.includes('Historic')) {
         div = $("#historic-chart");
         status = $("#historic-status");
@@ -247,15 +248,16 @@ function askAPI(method) {
         type: 'GET',
         async: true,
         url: '/apps/streamflowservices/query' + L.Util.getParamString({method: method, region: $("#watersheds_select_input").val(), reachid: reachid}),
-        success: function (data) {
-            holding = data;
+        success: function (html) {
             console.log('success ' + method);
             $("#chart_modal").modal('show');
             charttab.tab('show');
             status.html(' (ready)');
             status.css('color', 'green');
-            div.html(data['plot']);
-            $("#return_period_table").html(data['tablediv'])
+            div.html(html['plot']);
+            if (typeof(html['table']) != "undefined") {
+                table.html(html['table'])
+            }
         },
         error: function () {
             console.log('error ' + method);

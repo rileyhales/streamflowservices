@@ -1,0 +1,41 @@
+<h4 style="text-align: center">Statistical Summary of 52 Ensembles</h4>
+<table id="returntable" align="center">
+  <tbody>
+    <tr>
+      <th>Dates</th>
+      {% for day in days %}
+        <th>{{ day }}</th>
+      {% endfor %}
+    </tr>
+    <tr>
+      <td>Percent Exceeding 2-yr Flow</td>
+      {% for r in r2 %}
+        {% if r != 0 %}
+          <td style="background-color: rgba(255, 255, 0, calc(9 * {{ r }} / 1000 + .1))">{{ r }}%</td>
+        {% else %}
+          <td>0</td>
+        {% endif %}
+      {% endfor %}
+    </tr>
+    <tr>
+      <td>Percent Exceeding 10-yr Flow</td>
+      {% for r in r10 %}
+        {% if r != 0 %}
+          <td style="background-color: rgba(255, 0, 0, calc(9 * {{ r }} / 1000 + .1))">{{ r }}%</td>
+        {% else %}
+          <td>0</td>
+        {% endif %}
+      {% endfor %}
+    </tr>
+    <tr>
+      <td>Percent Exceeding 20-yr Flow</td>
+      {% for r in r20 %}
+        {% if r != 0 %}
+          <td style="background-color: rgba(128, 0, 128, calc(9 * {{ r }} / 1000 + .1))">{{ r }}%</td>
+        {% else %}
+          <td>0</td>
+        {% endif %}
+      {% endfor %}
+    </tr>
+  </tbody>
+</table>

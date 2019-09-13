@@ -5,6 +5,7 @@ import datetime
 
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
+from django.template.loader import render_to_string
 from django.http import JsonResponse
 from tethys_sdk.gizmos import SelectInput
 
@@ -94,9 +95,10 @@ def query(request):
         ensemble.index = pandas.to_datetime(ensemble.index)
 
         # Build the ensemble stat table- iterate over each day and then over each ensemble.
-        returntable = {'r2': [], 'r10': [], 'r20': []}
+        returntable = {'days': [], 'r2': [], 'r10': [], 'r20': []}
         for i in range(len(uniqueday) - 1):  # (-1) omit the extra day used for reference only
             tmp = ensemble.loc[uniqueday[i]:uniqueday[i + 1]]
+            returntable['days'].append(uniqueday[i].strftime('%b %d'))
             num2 = 0
             num10 = 0
             num20 = 0
@@ -211,7 +213,10 @@ def query(request):
             output_type='div',
             include_plotlyjs=False
         )
-        return JsonResponse({'plot': plotdiv, 'table': returntable})
+        return JsonResponse({
+            'plot': plotdiv,
+            'table': render_to_string('streamflowservices/template_returntable.html', returntable)
+        })
     elif 'Historic' in method:
         returns = pandas.read_csv(
             StringIO(requests.get(endpoint + 'ReturnPeriods', params=params).text), index_col='return period')

@@ -4,7 +4,7 @@
 {% load tethys_gizmos staticfiles %}
 {% load staticfiles %}
 {% block title %}{{ tethys_app.name }}{% endblock %}
-{% block app_icon %}<img src="{% static tethys_app.icon %}">{% endblock %}
+{% block app_icon %}<img alt="app_icon" src="{% static tethys_app.icon %}">{% endblock %}
 {% block app_title %}{{ tethys_app.name }}{% endblock %}
 
 {% block app_navigation_items %}
@@ -23,7 +23,6 @@
   <li class="{% if request.path == map %}active{% endif %}"><a href="{{ map }}">Watershed Map Viewer</a></li>
   <li class="{% if request.path == animation %}active{% endif %}"><a href="{{ animation }}">Streamflow Animation</a></li>
   <li class="{% if request.path == api %}active{% endif %}"><a href="{{ api }}">Access data by API</a></li>
-
 
   {% if request.path == map %}
     <li class="title">Instructions</li>
