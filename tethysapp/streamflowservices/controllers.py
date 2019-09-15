@@ -24,13 +24,8 @@ def home(request):
 
 
 @login_required()
-def methods(request):
-    return render(request, 'streamflowservices/methods.html', {})
-
-
-@login_required()
-def tutorial(request):
-    return render(request, 'streamflowservices/tutorial.html', {})
+def workshop(request):
+    return render(request, 'streamflowservices/workshop.html', {})
 
 
 @login_required()
@@ -112,9 +107,9 @@ def query(request):
                     num2 += 1
                 elif any(i > r2 for i in tmp[column].to_numpy()):
                     num2 += 1
-            returntable['r2'].append(round(num2 * 100 / 52, 2))
-            returntable['r10'].append(round(num10 * 100 / 52, 2))
-            returntable['r20'].append(round(num20 * 100 / 52, 2))
+            returntable['r2'].append(round(num2 * 100 / 52, 0))
+            returntable['r10'].append(round(num10 * 100 / 52, 0))
+            returntable['r20'].append(round(num20 * 100 / 52, 0))
 
         tmp = data[['datetime', 'mean (m3/s)']].dropna(axis=0)
         meanplot = Scatter(

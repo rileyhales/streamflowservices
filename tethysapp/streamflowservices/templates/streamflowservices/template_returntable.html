@@ -1,4 +1,4 @@
-<h4 style="text-align: center">Statistical Summary of 52 Ensembles</h4>
+<h4 style="text-align: center">Percent of Ensembles that Exceed Return Periods</h4>
 <table id="returntable" align="center">
   <tbody>
     <tr>
@@ -8,7 +8,7 @@
       {% endfor %}
     </tr>
     <tr>
-      <td>Percent Exceeding 2-yr Flow</td>
+      <td>2-yr Return Period</td>
       {% for r in r2 %}
         {% if r != 0 %}
           <td style="background-color: rgba(255, 255, 0, calc(9 * {{ r }} / 1000 + .1))">{{ r }}%</td>
@@ -18,7 +18,7 @@
       {% endfor %}
     </tr>
     <tr>
-      <td>Percent Exceeding 10-yr Flow</td>
+      <td>10-yr Return Period</td>
       {% for r in r10 %}
         {% if r != 0 %}
           <td style="background-color: rgba(255, 0, 0, calc(9 * {{ r }} / 1000 + .1))">{{ r }}%</td>
@@ -28,7 +28,7 @@
       {% endfor %}
     </tr>
     <tr>
-      <td>Percent Exceeding 20-yr Flow</td>
+      <td>20-yr Return Period</td>
       {% for r in r20 %}
         {% if r != 0 %}
           <td style="background-color: rgba(128, 0, 128, calc(9 * {{ r }} / 1000 + .1))">{{ r }}%</td>
