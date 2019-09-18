@@ -107,9 +107,9 @@ def query(request):
                     num2 += 1
                 elif any(i > r2 for i in tmp[column].to_numpy()):
                     num2 += 1
-            returntable['r2'].append(round(num2 * 100 / 52, 0))
-            returntable['r10'].append(round(num10 * 100 / 52, 0))
-            returntable['r20'].append(round(num20 * 100 / 52, 0))
+            returntable['r2'].append(round(num2 * 100 / 52))
+            returntable['r10'].append(round(num10 * 100 / 52))
+            returntable['r20'].append(round(num20 * 100 / 52))
 
         tmp = data[['datetime', 'mean (m3/s)']].dropna(axis=0)
         meanplot = Scatter(
@@ -163,7 +163,7 @@ def query(request):
             line={'color': 'black'}
         )
         layout = Layout(
-            title='Forecasted Streamflow',
+            title='Forecasted Streamflow<br>Stream ID: ' + str(params['reach_id']),
             xaxis={'title': 'Date'},
             yaxis={
                 'title': 'Streamflow (m<sup>3</sup>/s)',
