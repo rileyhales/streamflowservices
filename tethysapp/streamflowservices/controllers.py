@@ -71,6 +71,21 @@ def query(request):
     endpoint = 'http://global-streamflow-prediction.eastus.azurecontainer.io/api/'
     data = pandas.read_csv(StringIO(requests.get(endpoint + method, params=params).text))
     if 'Forecast' in method:
+        # filter the forecast data to get the hires data
+        hires = data[['datetime', 'high_res (m3/s)']].dropna(axis=0)
+
+        # get the ensemble/hires distribution for the stream reach
+        ensemble = pandas.read_csv(
+            StringIO(requests.get(endpoint + 'ForecastEnsembles', params=params).text), index_col='datetime')
+        ensemble.index = pandas.to_datetime(ensemble.index)
+
+        # get the return periods for the stream reach
+        returns = pandas.read_csv(
+            StringIO(requests.get(endpoint + 'ReturnPeriods', params=params).text), index_col='return period')
+        r2 = returns.iloc[3][0]
+        r10 = returns.iloc[2][0]
+        r20 = returns.iloc[1][0]
+
         # get the start/end date and date range
         tmp = data[['datetime']]
         startdate = tmp.iloc[0][0]
@@ -78,16 +93,6 @@ def query(request):
         start_datetime = datetime.datetime.strptime(startdate, "%Y-%m-%d %H:00:00")
         span = datetime.datetime.strptime(enddate, "%Y-%m-%d %H:00:00") - start_datetime
         uniqueday = [start_datetime + datetime.timedelta(days=i) for i in range(span.days + 2)]
-        # get the return periods for the stream reach
-        returns = pandas.read_csv(
-            StringIO(requests.get(endpoint + 'ReturnPeriods', params=params).text), index_col='return period')
-        r2 = returns.iloc[3][0]
-        r10 = returns.iloc[2][0]
-        r20 = returns.iloc[1][0]
-        # get the ensemble distribution for the stream reach
-        ensemble = pandas.read_csv(
-            StringIO(requests.get(endpoint + 'ForecastEnsembles', params=params).text), index_col='datetime')
-        ensemble.index = pandas.to_datetime(ensemble.index)
 
         # Build the ensemble stat table- iterate over each day and then over each ensemble.
         returntable = {'days': [], 'r2': [], 'r10': [], 'r20': []}
@@ -112,105 +117,23 @@ def query(request):
             returntable['r20'].append(round(num20 * 100 / 52))
 
         tmp = data[['datetime', 'mean (m3/s)']].dropna(axis=0)
-        meanplot = Scatter(
-            name='Mean',
-            x=list(tmp['datetime']),
-            y=list(tmp['mean (m3/s)']),
-            line=dict(color='blue'),
-        )
-        tmp = data[['datetime', 'max (m3/s)']].dropna(axis=0)
-        rangemax = max(data['max (m3/s)'])
-        maxplot = Scatter(
-            name='Max',
-            x=list(tmp['datetime']),
-            y=list(tmp['max (m3/s)']),
-            fill='tonexty',
-            mode='lines',
-            line=dict(color='rgb(152, 251, 152)', width=0)
-        )
-        tmp = data[['datetime', 'min (m3/s)']].dropna(axis=0)
-        minplot = Scatter(
-            name='Min',
-            x=list(tmp['datetime']),
-            y=list(tmp['min (m3/s)']),
-            fill=None,
-            mode='lines',
-            line=dict(color='rgb(152, 251, 152)')
-        )
-        tmp = data[['datetime', 'std_dev_range_lower (m3/s)']].dropna(axis=0)
-        stdlow = Scatter(
-            name='Std. Dev. Lower',
-            x=list(tmp['datetime']),
-            y=list(tmp['std_dev_range_lower (m3/s)']),
-            fill='tonexty',
-            mode='lines',
-            line=dict(color='rgb(152, 251, 152)', width=0)
-        )
-        tmp = data[['datetime', 'std_dev_range_upper (m3/s)']].dropna(axis=0)
-        stdup = Scatter(
-            name='Std. Dev. Upper',
-            x=list(tmp['datetime']),
-            y=list(tmp['std_dev_range_upper (m3/s)']),
-            fill='tonexty',
-            mode='lines',
-            line={'width': 0, 'color': 'rgb(34, 139, 34)'}
-        )
-        tmp = data[['datetime', 'high_res (m3/s)']].dropna(axis=0)
-        hires = Scatter(
-            name='Higher Resolution',
-            x=list(tmp['datetime']),
-            y=list(tmp['high_res (m3/s)']),
-            line={'color': 'black'}
-        )
-        layout = Layout(
-            title='Forecasted Streamflow<br>Stream ID: ' + str(params['reach_id']),
-            xaxis={'title': 'Date'},
-            yaxis={
-                'title': 'Streamflow (m<sup>3</sup>/s)',
-                'range': [0, 1.2 * rangemax]
-            },
-            shapes=[
-                go.layout.Shape(
-                    type='rect',
-                    x0=startdate,
-                    x1=enddate,
-                    y0=r2,
-                    y1=r10,
-                    line={'width': 0},
-                    opacity=.4,
-                    fillcolor='yellow'
-                ),
-                go.layout.Shape(
-                    type='rect',
-                    x0=startdate,
-                    x1=enddate,
-                    y0=r10,
-                    y1=r20,
-                    line={'width': 0},
-                    opacity=.4,
-                    fillcolor='red'
-                ),
-                go.layout.Shape(
-                    type='rect',
-                    x0=startdate,
-                    x1=enddate,
-                    y0=r20,
-                    y1=1.2 * rangemax,
-                    line={'width': 0},
-                    opacity=.4,
-                    fillcolor='purple'
-                ),
-            ]
-        )
-        plotdiv = offplot(
-            Figure([minplot, meanplot, maxplot, stdlow, stdup, hires], layout=layout),
-            config={'autosizable': True, 'responsive': True},
-            output_type='div',
-            include_plotlyjs=False
-        )
         return JsonResponse({
-            'plot': plotdiv,
-            'table': render_to_string('streamflowservices/template_returntable.html', returntable)
+            'x_ensemble': list(tmp['datetime']),
+            'x_hires': list(hires['datetime']),
+            'ymax': max(data['max (m3/s)']),
+            'min': list(data['min (m3/s)'].dropna(axis=0)),
+            'mean': list(data['mean (m3/s)'].dropna(axis=0)),
+            'max': list(data['max (m3/s)'].dropna(axis=0)),
+            'stdlow': list(data['std_dev_range_lower (m3/s)'].dropna(axis=0)),
+            'stdup': list(data['std_dev_range_upper (m3/s)'].dropna(axis=0)),
+            'hires': list(data['high_res (m3/s)'].dropna(axis=0)),
+            'r2': r2,
+            'r10': r10,
+            'r20': r20,
+            'table': render_to_string('streamflowservices/template_returntable.html', returntable),
+            'reach_id': str(params['reach_id']),
+            'xi': list(tmp['datetime'])[0],
+            'xf': list(tmp['datetime'])[-1]
         })
     elif 'Historic' in method:
         returns = pandas.read_csv(

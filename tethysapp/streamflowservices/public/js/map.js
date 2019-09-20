@@ -219,6 +219,104 @@ $("#watersheds_select_input").change(function () {
 });
 
 ////////////////////////////////////////////////////////////////////////  GET DATA FROM API
+function makeplot(sd) {
+    let plots = [
+        {
+            name: 'St Dev Below Mean',
+            x: sd.x_ensemble,
+            y: sd.stdlow,
+            fill: 'tonexty',
+            mode: "lines",
+            line: {color: 'rgb(38, 251, 58)', width: 0}
+        },
+        {
+            name: 'St Dev Above Mean',
+            x: sd.x_ensemble,
+            y: sd.stdup,
+            fill: 'tonexty',
+            mode: "lines",
+            line: {color: 'rgb(38, 251, 58)', width: 0}
+        },
+        {
+            name: 'Minimum',
+            x: sd.x_ensemble,
+            y: sd.min,
+            fill: 'none',
+            mode: "lines",
+            line: {color: 'rgb(152, 251, 152)'}
+        },
+        {
+            name: 'Maximum',
+            x: sd.x_ensemble,
+            y: sd.max,
+            fill: 'tonexty',
+            mode: "lines",
+            line: {color: 'rgb(152, 251, 152)', width: 0}
+        },
+        {
+            name: 'Mean',
+            x: sd.x_ensemble,
+            y: sd.mean,
+            mode: "lines",
+            line: {color: 'blue'}
+        },
+        {
+            name: 'High Resolution',
+            x: sd.x_hires,
+            y: sd.hires,
+            mode: "lines",
+            line: {color: 'black'}
+        }
+    ];
+    let shapes = [
+        {
+            type: 'rect',
+            layer: 'below',
+            xref: 'x',
+            yref: 'y',
+            x0: sd.xi,
+            y0: sd.r2,
+            x1: sd.xf,
+            y1: sd.r10,
+            line: {width: 0},
+            fillcolor: 'rgba(255, 255, 0, 0.4)'
+        },
+        {
+            type: 'rect',
+            layer: 'below',
+            xref: 'x',
+            yref: 'y',
+            x0: sd.xi,
+            y0: sd.r10,
+            x1: sd.xf,
+            y1: sd.r20,
+            line: {width: 0},
+            fillcolor: 'rgba(255, 0, 0, 0.4)'
+        },
+        {
+            type: 'rect',
+            layer: 'below',
+            xref: 'x',
+            yref: 'y',
+            x0: sd.xi,
+            y0: sd.r20,
+            x1: sd.xf,
+            y1: sd.ymax,
+            line: {width: 0},
+            fillcolor: 'rgba(128, 0, 128, 0.4)'
+        }
+    ];
+
+    let layout = {
+        title: 'Forecasted Streamflow<br>Stream ID: ' + sd.reach_id,
+        xaxis: {title: 'Date'},
+        yaxis: {title: 'Streamflow m3/s', range: [0, sd.ymax]},
+        shapes: shapes,
+    };
+    $("#forecast-chart").html('');
+    Plotly.newPlot("forecast-chart", plots, layout);
+}
+
 function askAPI(method) {
     if (!reachid) {return}
     else if (!needsRefresh[method]) {return}
@@ -248,15 +346,16 @@ function askAPI(method) {
         type: 'GET',
         async: true,
         url: '/apps/streamflowservices/query' + L.Util.getParamString({method: method, region: $("#watersheds_select_input").val(), reachid: reachid}),
-        success: function (html) {
+        success: function (seriesdata) {
             console.log('success ' + method);
             $("#chart_modal").modal('show');
             charttab.tab('show');
             status.html(' (ready)');
             status.css('color', 'green');
-            div.html(html['plot']);
-            if (typeof(html['table']) != "undefined") {
-                table.html(html['table'])
+            makeplot(seriesdata);
+            table.html(seriesdata['table']);
+            if (typeof(seriesdata['table']) != "undefined") {
+                table.html(seriesdata['table'])
             }
         },
         error: function () {
