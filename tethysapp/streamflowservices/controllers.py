@@ -3,7 +3,6 @@ import requests
 import pandas
 import datetime
 
-from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from django.template.loader import render_to_string
 from django.http import JsonResponse
@@ -18,17 +17,14 @@ from .options import watersheds_db
 from .app import Streamflowservices as App
 
 
-@login_required()
 def home(request):
     return render(request, 'streamflowservices/home.html', {})
 
 
-@login_required()
 def workshop(request):
     return render(request, 'streamflowservices/workshop.html', {})
 
 
-@login_required()
 def map(request):
     sds = App.get_spatial_dataset_service('geoserver', as_wms=True)
     workspace = App.get_custom_setting('geoserver_workspace')
@@ -53,12 +49,10 @@ def map(request):
     return render(request, 'streamflowservices/map.html', context)
 
 
-@login_required()
 def animation(request):
     return render(request, 'streamflowservices/animationmap.html', {})
 
 
-@login_required()
 def api(request):
     return render(request, 'streamflowservices/api.html', {})
 
