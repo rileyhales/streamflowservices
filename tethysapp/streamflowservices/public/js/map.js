@@ -21,7 +21,7 @@ L.TileLayer.WMFS = L.TileLayer.WMS.extend({
         params[params.version === '1.3.0' ? 'j' : 'y'] = evt.containerPoint.y;
 
         let url = this._url + L.Util.getParamString(params, this._url, true);
-        console.log(url);
+        // console.log(url);
         let reachid = null;
 
         if (url) {
@@ -247,16 +247,16 @@ function askAPI(method) {
     $.ajax({
         type: 'GET',
         async: true,
-        url: '/apps/streamflowservices/query' + L.Util.getParamString({method: method, region: $("#watersheds_select_input").val(), reachid: reachid}),
+        url: '/apps/streamflowservices/query' + L.Util.getParamString({method: method, region: $("#watersheds_select_input").val(), reach_id: reachid}),
         success: function (html) {
             console.log('success ' + method);
             $("#chart_modal").modal('show');
             charttab.tab('show');
             status.html(' (ready)');
             status.css('color', 'green');
-            div.html(html['plot']);
-            if (typeof(html['table']) != "undefined") {
-                table.html(html['table'])
+            div.html(html['fp']);
+            if (typeof(html['pt']) != "undefined") {
+                table.html(html['pt'])
             }
         },
         error: function () {
