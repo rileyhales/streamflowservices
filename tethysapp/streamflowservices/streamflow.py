@@ -23,9 +23,7 @@ def forecast_stats(reach_id, apikey, return_format='csv'):
         'return_format': return_format
     }
     headers = {'Ocp-Apim-Subscription-Key': apikey}
-
     data = requests.get(AZURE_ENDPOINT + 'ForecastStats', headers=headers, params=params).text
-    print(data)
 
     if return_format == 'csv':
         return pandas.read_csv(StringIO(data))
@@ -41,7 +39,6 @@ def forecast_ensembles(reach_id, apikey, return_format='csv'):
         'return_format': return_format
     }
     headers = {'Ocp-Apim-Subscription-Key': apikey}
-
     data = requests.get(AZURE_ENDPOINT + 'ForecastEnsembles', headers=headers, params=params).text
 
     if return_format == 'csv':
@@ -60,7 +57,6 @@ def historic_simulation(reach_id, apikey, return_format='csv'):
         'return_format': return_format
     }
     headers = {'Ocp-Apim-Subscription-Key': apikey}
-
     data = requests.get(AZURE_ENDPOINT + 'HistoricSimulation', headers=headers, params=params).text
 
     if return_format == 'csv':
@@ -77,7 +73,6 @@ def seasonal_average(reach_id, apikey, return_format='csv'):
         'return_format': return_format
     }
     headers = {'Ocp-Apim-Subscription-Key': apikey}
-
     data = requests.get(AZURE_ENDPOINT + 'SeasonalAverage', headers=headers, params=params).text
 
     if return_format == 'csv':
@@ -94,7 +89,6 @@ def return_periods(reach_id, apikey, return_format='csv'):
         'return_format': return_format
     }
     headers = {'Ocp-Apim-Subscription-Key': apikey}
-
     data = requests.get(AZURE_ENDPOINT + 'ReturnPeriods', headers=headers, params=params).text
 
     if return_format == 'csv':
@@ -387,7 +381,8 @@ def probabilities_table(stats, ensembles, rperiods):
         r10.append(round(num10 * 100 / 52))
         r20.append(round(num20 * 100 / 52))
 
-    with open(os.path.join(os.pardir, 'templates', 'probabilities_table.html')) as template:
+    with open(os.path.join(
+            os.path.dirname(__file__), 'templates', 'streamflowservices', 'probabilities_table.html')) as template:
         return jinja2.Template(template.read()).render(days=days, r2=r2, r10=r10, r20=r20)
 
 

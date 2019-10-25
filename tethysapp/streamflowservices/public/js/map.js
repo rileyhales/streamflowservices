@@ -247,16 +247,16 @@ function askAPI(method) {
     $.ajax({
         type: 'GET',
         async: true,
-        url: '/apps/streamflowservices/query' + L.Util.getParamString({method: method, region: $("#watersheds_select_input").val(), reach_id: reachid}),
+        url: '/apps/streamflowservices/query' + L.Util.getParamString({method: method, reach_id: reachid}),
         success: function (html) {
             console.log('success ' + method);
             $("#chart_modal").modal('show');
             charttab.tab('show');
             status.html(' (ready)');
             status.css('color', 'green');
-            div.html(html['fp']);
-            if (typeof(html['pt']) != "undefined") {
-                table.html(html['pt'])
+            div.html(html['plot']);
+            if (typeof(html['table']) != "undefined") {
+                table.html(html['table'])
             }
         },
         error: function () {

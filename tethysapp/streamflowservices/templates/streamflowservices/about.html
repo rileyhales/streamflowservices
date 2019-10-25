@@ -1,0 +1,49 @@
+{% extends "streamflowservices/base.html" %}
+{% load tethys_gizmos %}
+
+{% block app_content %}
+<h2>Global Streamflow Forecasting Project</h2>
+<p>
+  The Global Streamflow Prediction Services were developed by Dr Michael Suffront and Dr Jim Nelson with their
+  colleagues at Brigham Young University. This streamflow service provides a 15 day forecast of estimated streamflow
+  and a simulation of flow since 1980 for every stream around the planet. This information is accessible through a rest
+  API, a map interface for exploring the stream network and retrieving data, and an animated map showing the magnitude
+  of flows across through each stream. (view the services section of the navigation)
+</p>
+
+<p>
+  The global hydrologic model is primarily driven by:
+  <ol>
+  <li>A GIS watershed and stream network delineation using hydrologically conditioned DEMs courtesy of ESRI</li>
+  <li>
+    Medium-range (15 day) weather forecasts from the European Centre for Medium-Range Weather Forecasting. The
+    precipitation accumuation forecasts consist of a 51 member ensemble at .5 degree spatial resolution and 3-hour
+    temporal resolution for 15 days and a .25 degree and 1-hourly forecast for 10 days.
+  </li>
+  <li>
+    The rapid routing method that maps each of the 52 ensemble member's runoff estimation to a watershed and through
+    the stream network.
+  </li>
+</ol>
+</p>
+
+<p>
+  This research has been supported by the European Centre for Medium-Range Weather Forecasting (ECMWF), the Group on
+  Earth Observations - Global Water Security (GEOGLOWS) and GEOSS Program, ESRI, the NASA SERVIR project, Microsoft
+  Azure's AI for Earth Initiative, Brigham Young University and foundational work of other doctoral students, The
+  World Bank, Tethys Platform, many other open source softwares and the online programming community, and the support
+  of many people at all these institutions.
+</p>
+
+<li>PHD students who worked on developing the tool</li>
+<li>People that worked on SFPT and Derivative Applications</li>
+
+<h1>Additional Resources</h1>
+<li>How to get copies of the shapefiles through hydroshare</li>
+<li>Link to SFPT app/docker container githubs here</li>
+<li>Link to readthedocs for this app, old sfpt tool</li>
+<li>Link animation on ESRI living atlas</li>
+
+<h1>Citations</h1>
+<li>Maybe links to some particularly important publications</li>
+{% endblock %}

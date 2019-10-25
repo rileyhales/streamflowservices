@@ -8,14 +8,6 @@ from .streamflow import *
 
 
 def home(request):
-    return render(request, 'streamflowservices/home.html', {})
-
-
-def workshop(request):
-    return render(request, 'streamflowservices/workshop.html', {})
-
-
-def map(request):
     sds = App.get_spatial_dataset_service('geoserver', as_wms=True)
     workspace = App.get_custom_setting('geoserver_workspace')
     url = sds.replace('wms', workspace + '/wms')
@@ -36,7 +28,7 @@ def map(request):
         'gs_workspace': workspace,
     }
 
-    return render(request, 'streamflowservices/map.html', context)
+    return render(request, 'streamflowservices/home.html', context)
 
 
 def animation(request):
@@ -45,6 +37,14 @@ def animation(request):
 
 def api(request):
     return render(request, 'streamflowservices/api.html', {})
+
+
+def about(request):
+    return render(request, 'streamflowservices/about.html', {})
+
+
+def workshop(request):
+    return render(request, 'streamflowservices/workshop.html', {})
 
 
 def query(request):
@@ -58,11 +58,11 @@ def query(request):
         rperiods = return_periods(reach_id, apitoken)
         fp = forecast_plot(stats, rperiods, reach_id, outformat='plotly_html')
         pt = probabilities_table(stats, ensembles, rperiods)
-        return dict(forecast_plot=fp, prob_table=pt)
+        return JsonResponse(dict(plot=fp, table=pt))
     elif 'Historic' in method:
         hist = historic_simulation(data['reach_id'], apitoken)
         rperiods = return_periods(data['reach_id'], apitoken)
-        return historical_plot(hist, rperiods, outformat='plotly_html')
+        return JsonResponse(dict(plot=historical_plot(hist, rperiods, outformat='plotly_html')))
     else:  # 'Season' in method:
         daily = seasonal_average(data['reach_id'], apitoken)
-        return daily_avg_plot(daily, outformat='plotly_html')
+        return JsonResponse(dict(plot=daily_avg_plot(daily, outformat='plotly_html')))

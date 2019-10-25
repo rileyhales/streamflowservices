@@ -22,15 +22,11 @@ class Streamflowservices(TethysAppBase):
     def url_maps(self):
         UrlMap = url_map_maker(self.root_url)
         return (
+            # Services page
             UrlMap(
                 name='home',
-                url='streamflowservices',
+                url='streamflowservices/map',
                 controller='streamflowservices.controllers.home'
-            ),
-            UrlMap(
-                name='workshop',
-                url='streamflowservices/workshop',
-                controller='streamflowservices.controllers.workshop'
             ),
             UrlMap(
                 name='animation',
@@ -38,15 +34,24 @@ class Streamflowservices(TethysAppBase):
                 controller='streamflowservices.controllers.animation'
             ),
             UrlMap(
-                name='map',
-                url='streamflowservices/map',
-                controller='streamflowservices.controllers.map'
-            ),
-            UrlMap(
                 name='api',
                 url='streamflowservices/api',
                 controller='streamflowservices.controllers.api'
             ),
+
+            # Global Streamflow Prediction about pages
+            UrlMap(
+                name='about',
+                url='streamflowservices/about',
+                controller='streamflowservices.controllers.about'
+            ),
+            UrlMap(
+                name='workshop',
+                url='streamflowservices/workshop',
+                controller='streamflowservices.controllers.workshop'
+            ),
+
+            # AJAX Controller
             UrlMap(
                 name='query',
                 url='streamflowservices/query',
