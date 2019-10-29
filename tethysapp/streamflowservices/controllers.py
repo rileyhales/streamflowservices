@@ -1,10 +1,12 @@
+import json
+import geoglows
+
 from django.shortcuts import render
 from django.http import JsonResponse
 from tethys_sdk.gizmos import SelectInput
 
 from .options import watersheds_db
 from .app import Streamflowservices as App
-from .streamflow import *
 
 
 def home(request):
@@ -53,16 +55,22 @@ def query(request):
     reach_id = data['reach_id']
     apitoken = App.get_custom_setting('api_token')
     if 'Forecast' in method:
-        stats = forecast_stats(reach_id, apitoken)
-        ensembles = forecast_ensembles(reach_id, apitoken)
-        rperiods = return_periods(reach_id, apitoken)
-        fp = forecast_plot(stats, rperiods, reach_id, outformat='plotly_html')
-        pt = probabilities_table(stats, ensembles, rperiods)
+        stats = geoglows.streamflow.forecast_stats(
+            reach_id, apitoken, api_source=geoglows.streamflow.BYU_ENDPOINT)
+        ensembles = geoglows.streamflow.forecast_ensembles(
+            reach_id, apitoken, api_source=geoglows.streamflow.BYU_ENDPOINT)
+        rperiods = geoglows.streamflow.return_periods(
+            reach_id, apitoken, api_source=geoglows.streamflow.BYU_ENDPOINT)
+        fp = geoglows.streamflow.forecast_plot(stats, rperiods, reach_id, outformat='plotly_html')
+        pt = geoglows.streamflow.probabilities_table(stats, ensembles, rperiods)
         return JsonResponse(dict(plot=fp, table=pt))
     elif 'Historic' in method:
-        hist = historic_simulation(data['reach_id'], apitoken)
-        rperiods = return_periods(data['reach_id'], apitoken)
-        return JsonResponse(dict(plot=historical_plot(hist, rperiods, outformat='plotly_html')))
+        hist = geoglows.streamflow.historic_simulation(
+            data['reach_id'], apitoken, api_source=geoglows.streamflow.BYU_ENDPOINT)
+        rperiods = geoglows.streamflow.return_periods(
+            data['reach_id'], apitoken, api_source=geoglows.streamflow.BYU_ENDPOINT)
+        return JsonResponse(dict(plot=geoglows.streamflow.historical_plot(hist, rperiods, outformat='plotly_html')))
     else:  # 'Season' in method:
-        daily = seasonal_average(data['reach_id'], apitoken)
-        return JsonResponse(dict(plot=daily_avg_plot(daily, outformat='plotly_html')))
+        daily = geoglows.streamflow.seasonal_average(
+            data['reach_id'], apitoken, api_source=geoglows.streamflow.BYU_ENDPOINT)
+        return JsonResponse(dict(plot=geoglows.streamflow.daily_avg_plot(daily, outformat='plotly_html')))
