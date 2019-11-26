@@ -12,5 +12,5 @@ def watersheds_db():
         ('Africa', 'africa-geoglows'),
         ('South America', 'south_america-geoglows'),
         ('Central America', 'central_america-geoglows'),
-        # ('North America', 'north_america-geoglows'),
+        ('North America', 'north_america-geoglows'),
     )

@@ -68,12 +68,6 @@ class Streamflowservices(TethysAppBase):
                             'the GeoServer that you specified in Spatial Dataset Service Settings',
                 required=True,
             ),
-            CustomSetting(
-                name='api_token',
-                type=CustomSetting.TYPE_STRING,
-                description='A valid api token to the azure ai for earth api system',
-                required=True,
-            ),
         )
 
     def spatial_dataset_service_settings(self):
