@@ -1,4 +1,4 @@
-# Streamflow Prediction Services
+# GEOGloWS ECMWF Streamflow Explorer
 
 This app requires a geoserver to show the Boundary, Catchment, and Drainage Line shapefiles for each of the regions 
 the tool was developed for. The shapefiles are available on HydroShare.

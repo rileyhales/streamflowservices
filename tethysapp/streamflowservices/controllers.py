@@ -1,12 +1,27 @@
 import json
-import geoglows
+import geoglows.streamflow as sf
 
 from django.shortcuts import render
 from django.http import JsonResponse
 from tethys_sdk.gizmos import SelectInput
 
-from .options import watersheds_db
 from .app import Streamflowservices as App
+
+watersheds_db = (
+        ('Indonesia', 'indonesia-geoglows'),
+        ('Australia', 'australia-geoglows'),
+        ('Japan', 'japan-geoglows'),
+        ('East Asia', 'east_asia-geoglows'),
+        ('South Asia', 'south_asia-geoglows'),
+        ('Central Asia', 'central_asia-geoglows'),
+        # ('West Asia', 'west_asia-geoglows'),
+        ('Middle East', 'middle_east-geoglows'),
+        ('Europe', 'europe-geoglows'),
+        ('Africa', 'africa-geoglows'),
+        ('South America', 'south_america-geoglows'),
+        ('Central America', 'central_america-geoglows'),
+        ('North America', 'north_america-geoglows')
+)
 
 
 def home(request):
@@ -19,12 +34,12 @@ def home(request):
         name='watersheds_select_input',
         multiple=False,
         original=True,
-        options=[('View All Watersheds', '')] + list(watersheds_db()),
+        options=[('View All Watersheds', '')] + list(watersheds_db),
         initial=''
     )
 
     context = {
-        'watersheds': json.dumps({'list': list(watersheds_db())}),
+        'watersheds': json.dumps({'list': list(watersheds_db)}),
         'watersheds_select_input': watersheds_select_input,
         'gs_url': url,
         'gs_workspace': workspace,
@@ -54,16 +69,16 @@ def query(request):
     method = data['method']
     reach_id = data['reach_id']
     if 'Forecast' in method:
-        stats = geoglows.streamflow.forecast_stats(reach_id)
-        ensembles = geoglows.streamflow.forecast_ensembles(reach_id)
-        rperiods = geoglows.streamflow.return_periods(reach_id)
-        fp = geoglows.streamflow.forecast_plot(stats, rperiods, reach_id, outformat='plotly_html')
-        pt = geoglows.streamflow.probabilities_table(stats, ensembles, rperiods)
+        stats = sf.forecast_stats(reach_id, endpoint=sf.BYU_ENDPOINT)
+        ensembles = sf.forecast_ensembles(reach_id, endpoint=sf.BYU_ENDPOINT)
+        rperiods = sf.return_periods(reach_id, endpoint=sf.BYU_ENDPOINT)
+        fp = sf.forecast_plot(stats, rperiods, reach_id=reach_id, outformat='plotly_html')
+        pt = sf.probabilities_table(stats, ensembles, rperiods)
         return JsonResponse(dict(plot=fp, table=pt))
     elif 'Historic' in method:
-        hist = geoglows.streamflow.historic_simulation(reach_id)
-        rperiods = geoglows.streamflow.return_periods(reach_id)
-        return JsonResponse(dict(plot=geoglows.streamflow.historical_plot(hist, rperiods, outformat='plotly_html')))
+        hist = sf.historic_simulation(reach_id, endpoint=sf.BYU_ENDPOINT)
+        rperiods = sf.return_periods(reach_id, endpoint=sf.BYU_ENDPOINT)
+        return JsonResponse(dict(plot=sf.historical_plot(hist, rperiods, reach_id=reach_id, outformat='plotly_html')))
     else:  # 'Season' in method:
-        daily = geoglows.streamflow.seasonal_average(reach_id)
-        return JsonResponse(dict(plot=geoglows.streamflow.daily_avg_plot(daily, outformat='plotly_html')))
+        daily = sf.seasonal_average(reach_id, endpoint=sf.BYU_ENDPOINT)
+        return JsonResponse(dict(plot=sf.seasonal_plot(daily, outformat='plotly_html')))

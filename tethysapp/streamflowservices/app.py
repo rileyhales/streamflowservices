@@ -7,15 +7,14 @@ class Streamflowservices(TethysAppBase):
     Tethys app class for Streamflow Prediction Services.
     """
 
-    name = 'Streamflow Prediction Services'
+    name = 'GEOGloWS ECMWF Streamflow Explorer'
     index = 'streamflowservices:home'
     icon = 'streamflowservices/images/water.jpg'
     package = 'streamflowservices'
     root_url = 'streamflowservices'
     color = '#3b8392'
-    description = 'An app for consuming all the services available from the Global Streamflow Prediction service ' \
-                  'developed at Brigham Young University'
-    tags = ''
+    description = 'An app for consuming all the services available from the GEOGloWS ECMWF Streamflow Prediction ' \
+                  'service developed at Brigham Young University'
     enable_feedback = False
     feedback_emails = []
 
