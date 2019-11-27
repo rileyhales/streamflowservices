@@ -32,11 +32,6 @@ class Streamflowservices(TethysAppBase):
                 url='streamflowservices/animation',
                 controller='streamflowservices.controllers.animation'
             ),
-            UrlMap(
-                name='api',
-                url='streamflowservices/api',
-                controller='streamflowservices.controllers.api'
-            ),
 
             # Global Streamflow Prediction about pages
             UrlMap(
