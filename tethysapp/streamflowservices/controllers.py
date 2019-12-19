@@ -57,7 +57,6 @@ def query(request):
     method = data['method']
     drain_area = data['drain_area']
     reach_id = data['reach_id']
-    print(drain_area)
     if 'Forecast' in method:
         stats = sf.forecast_stats(reach_id, endpoint=sf.BYU_ENDPOINT)
         ensembles = sf.forecast_ensembles(reach_id, endpoint=sf.BYU_ENDPOINT)
