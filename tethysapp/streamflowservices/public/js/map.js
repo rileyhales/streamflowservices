@@ -23,6 +23,7 @@ L.TileLayer.WMFS = L.TileLayer.WMS.extend({
         let url = this._url + L.Util.getParamString(params, this._url, true);
         // console.log(url);
         let reachid = null;
+        let drain_area = null;
 
         if (url) {
             $.ajax({
@@ -31,12 +32,15 @@ L.TileLayer.WMFS = L.TileLayer.WMS.extend({
                 url: url,
                 info_format: 'application/json',
                 success: function (data) {
+                    console.log(data.features[0].properties);
                     reachid = data.features[0].properties['COMID'];
+                    drain_area = data.features[0].properties['Tot_Drain_'];
                     console.log(reachid);
+                    console.log(drain_area);
                 }
             });
         }
-        return reachid
+        return [reachid, drain_area]
     },
 });
 
@@ -110,6 +114,7 @@ function getDrainageLine(layername) {
     })
 }
 let reachid;
+let drain_area;
 let needsRefresh = {};
 
 let watersheds = JSON.parse($("#map").attr('watersheds'))['list'];
@@ -146,7 +151,9 @@ const chart_divs = [$("#forecast-chart"), $("#historic-chart"), $("#flowduration
 mapObj.on("click", function (event) {
     if (mapObj.getZoom() >= cd_threshold) {
         if (marker) {mapObj.removeLayer(marker)}
-        reachid = drainage_layer.GetFeatureInfo(event);
+        meta = drainage_layer.GetFeatureInfo(event);
+        reachid = meta[0];
+        drain_area = meta[1];
         marker = L.marker(event.latlng).addTo(mapObj);
         marker.bindPopup('<b>Watershed/Region:</b> ' + $("#watersheds_select_input").val() + '<br><b>Reach ID:</b> ' + reachid);
         needsRefresh = {'ForecastStats': true, 'HistoricSimulation': true, 'FlowDurationCurve': true, 'SeasonalAverage': true};
@@ -254,7 +261,7 @@ function askAPI(method) {
     $.ajax({
         type: 'GET',
         async: true,
-        url: '/apps/streamflowservices/query' + L.Util.getParamString({method: method, reach_id: reachid}),
+        url: '/apps/streamflowservices/query' + L.Util.getParamString({method: method, reach_id: reachid, drain_area: drain_area}),
         success: function (html) {
             console.log('success ' + method);
             charttab.tab('show');

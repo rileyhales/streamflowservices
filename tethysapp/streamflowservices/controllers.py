@@ -55,21 +55,23 @@ def animation(request):
 def query(request):
     data = request.GET
     method = data['method']
+    drain_area = data['drain_area']
     reach_id = data['reach_id']
+    print(drain_area)
     if 'Forecast' in method:
         stats = sf.forecast_stats(reach_id, endpoint=sf.BYU_ENDPOINT)
         ensembles = sf.forecast_ensembles(reach_id, endpoint=sf.BYU_ENDPOINT)
         rperiods = sf.return_periods(reach_id, endpoint=sf.BYU_ENDPOINT)
-        fp = sf.forecast_plot(stats, rperiods, reach_id=reach_id, outformat='plotly_html')
+        fp = sf.forecast_plot(stats, rperiods, reach_id=reach_id, drain_area=drain_area, outformat='plotly_html')
         pt = sf.probabilities_table(stats, ensembles, rperiods)
         return JsonResponse(dict(plot=fp, table=pt))
     elif 'Historic' in method:
         hist = sf.historic_simulation(reach_id, endpoint=sf.BYU_ENDPOINT)
         rperiods = sf.return_periods(reach_id, endpoint=sf.BYU_ENDPOINT)
-        return JsonResponse(dict(plot=sf.historical_plot(hist, rperiods, reach_id=reach_id, outformat='plotly_html')))
+        return JsonResponse(dict(plot=sf.historical_plot(hist, rperiods, reach_id=reach_id, drain_area=drain_area, outformat='plotly_html')))
     elif 'FlowDurationCurve' in method:
         hist = sf.historic_simulation(reach_id, endpoint=sf.BYU_ENDPOINT)
-        return JsonResponse(dict(plot=sf.flow_duration_curve_plot(hist, reach_id=reach_id, outformat='plotly_html')))
+        return JsonResponse(dict(plot=sf.flow_duration_curve_plot(hist, reach_id=reach_id, drain_area=drain_area, outformat='plotly_html')))
     else:  # 'Season' in method:
         daily = sf.seasonal_average(reach_id, endpoint=sf.BYU_ENDPOINT)
-        return JsonResponse(dict(plot=sf.seasonal_plot(daily, outformat='plotly_html')))
+        return JsonResponse(dict(plot=sf.seasonal_plot(daily, reach_id=reach_id, drain_area=drain_area, outformat='plotly_html')))
