@@ -33,18 +33,6 @@ class Streamflowservices(TethysAppBase):
                 controller='streamflowservices.controllers.animation'
             ),
 
-            # Global Streamflow Prediction about pages
-            UrlMap(
-                name='about',
-                url='streamflowservices/about',
-                controller='streamflowservices.controllers.about'
-            ),
-            UrlMap(
-                name='workshop',
-                url='streamflowservices/workshop',
-                controller='streamflowservices.controllers.workshop'
-            ),
-
             # AJAX Controller
             UrlMap(
                 name='query',

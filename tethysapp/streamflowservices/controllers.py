@@ -20,7 +20,7 @@ watersheds_db = (
         ('Africa', 'africa-geoglows'),
         ('South America', 'south_america-geoglows'),
         ('Central America', 'central_america-geoglows'),
-        ('North America', 'north_america-geoglows')
+        # ('North America', 'north_america-geoglows')
 )
 
 
@@ -52,18 +52,6 @@ def animation(request):
     return render(request, 'streamflowservices/animationmap.html', {})
 
 
-def api(request):
-    return render(request, 'streamflowservices/api.html', {})
-
-
-def about(request):
-    return render(request, 'streamflowservices/about.html', {})
-
-
-def workshop(request):
-    return render(request, 'streamflowservices/workshop.html', {})
-
-
 def query(request):
     data = request.GET
     method = data['method']
@@ -79,6 +67,9 @@ def query(request):
         hist = sf.historic_simulation(reach_id, endpoint=sf.BYU_ENDPOINT)
         rperiods = sf.return_periods(reach_id, endpoint=sf.BYU_ENDPOINT)
         return JsonResponse(dict(plot=sf.historical_plot(hist, rperiods, reach_id=reach_id, outformat='plotly_html')))
+    elif 'FlowDurationCurve' in method:
+        hist = sf.historic_simulation(reach_id, endpoint=sf.BYU_ENDPOINT)
+        return JsonResponse(dict(plot=sf.flow_duration_curve_plot(hist, reach_id=reach_id, outformat='plotly_html')))
     else:  # 'Season' in method:
         daily = sf.seasonal_average(reach_id, endpoint=sf.BYU_ENDPOINT)
         return JsonResponse(dict(plot=sf.seasonal_plot(daily, outformat='plotly_html')))
