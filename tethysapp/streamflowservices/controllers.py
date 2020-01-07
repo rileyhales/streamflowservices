@@ -1,4 +1,5 @@
 import json
+import os
 import geoglows.streamflow as sf
 
 from django.shortcuts import render
@@ -24,7 +25,7 @@ watersheds_db = (
 )
 
 
-def home(request):
+def hydroviewer(request):
     sds = App.get_spatial_dataset_service('geoserver', as_wms=True)
     workspace = App.get_custom_setting('geoserver_workspace')
     url = sds.replace('wms', workspace + '/wms')
@@ -45,11 +46,14 @@ def home(request):
         'gs_workspace': workspace,
     }
 
-    return render(request, 'streamflowservices/home.html', context)
+    return render(request, 'streamflowservices/hydroviewer.html', context)
 
 
 def animation(request):
-    return render(request, 'streamflowservices/animationmap.html', {})
+    app_workspace = App.get_app_workspace()
+    with open(os.path.join(app_workspace.path, 'countries.geojson')) as json_data:
+        data_dict = json.load(json_data)
+    return render(request, 'streamflowservices/animation.html', {'countries': data_dict})
 
 
 def query(request):

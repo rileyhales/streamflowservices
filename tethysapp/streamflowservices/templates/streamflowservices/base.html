@@ -8,19 +8,34 @@
 {% block app_title %}{{ tethys_app.name }}{% endblock %}
 
 {% block app_navigation_items %}
-  {% url 'streamflowservices:home' as home %}
+  {% url 'streamflowservices:home' as hydroviewer %}
   {% url 'streamflowservices:animation' as animation %}
 
   <li class="title">Global Streamflow Prediction</li>
-  <li class="{% if request.path == home %}active{% endif %}"><a href="{{ home }}">Watershed Map Viewer</a></li>
+  <li class="{% if request.path == hydroviewer %}active{% endif %}"><a href="{{ hydroviewer }}">Global Hydroviewer</a></li>
   <li class="{% if request.path == animation %}active{% endif %}"><a href="{{ animation }}">Streamflow Animation</a></li>
 
-  {% if request.path == home %}
+  {% if request.path == hydroviewer %}
     <li class="title">Map Instructions</li>
     <li>{% gizmo select_input watersheds_select_input %}</li>
     <li>Zoom in to a Stream</li>
     <li>Click on the Stream (a marker will appear and charts will start to load)</li>
     <li>Repeat with other streams/watersheds</li>
+  {% endif %}
+
+  {% if request.path == animation %}
+    <li class="title">Map Instructions</li>
+    <li class="title">Choose the Country to Visualize</li>
+    <li class="active"><a href="">Use dropdown</a></li>
+    <select id='countryList'> </select>
+    <li class="active"><a href="">or Look Country in the Search Box</a></li>
+
+    <!--Make sure the form has the autocomplete function switched off:-->
+    <form autocomplete="off" action="/action_page.php">
+      <div class="autocomplete" style="width:300px;">
+        <input id="myInput" type="text" name="myCountry" placeholder="Type Country">
+      </div>
+    </form>
   {% endif %}
 
 {% endblock %}

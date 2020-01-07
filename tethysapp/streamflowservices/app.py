@@ -24,8 +24,8 @@ class Streamflowservices(TethysAppBase):
             # Services page
             UrlMap(
                 name='home',
-                url='streamflowservices/map',
-                controller='streamflowservices.controllers.home'
+                url='streamflowservices/',
+                controller='streamflowservices.controllers.hydroviewer'
             ),
             UrlMap(
                 name='animation',

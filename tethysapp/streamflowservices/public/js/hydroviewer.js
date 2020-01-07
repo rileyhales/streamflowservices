@@ -50,7 +50,7 @@ L.tileLayer.WMFS = function (url, options) {
 
 
 ////////////////////////////////////////////////////////////////////////  MAP FUNCTIONS AND VARIABLES
-function map() {
+function hydroviewer() {
     return L.map('map', {
         zoom: 3,
         minZoom: 2,
@@ -125,7 +125,7 @@ let catchment_layer;
 let drainage_layer;
 let marker = null;
 ////////////////////////////////////////////////////////////////////////  SETUP THE MAP
-let mapObj = map();
+let mapObj = hydroviewer();
 let basemapObj = basemaps();
 let controlsObj;
 legend.addTo(mapObj);
@@ -139,15 +139,6 @@ let bc_threshold = 6;
 let cd_threshold = 8;
 const status_divs = [$("#forecast-status"), $("#historic-status"), $("#flowduration-status"), $("#daily-status")];
 const chart_divs = [$("#forecast-chart"), $("#historic-chart"), $("#flowduration-chart"), $("#daily-chart")];
-// $("#forecast_tab_link").on('click', function () {
-    // Plotly.Plots.resize($("#forecast-chart .js-plotly-plot")[0]);
-// });
-// $("#historical_tab_link").on('click', function () {
-    // Plotly.Plots.resize($("#historical-chart .js-plotly-plot")[0]);
-// });
-// $("#seasonal_avg_tab_link").on('click', function () {
-    // Plotly.Plots.resize($("#seasonal-chart .js-plotly-plot")[0]);
-// });
 mapObj.on("click", function (event) {
     if (mapObj.getZoom() >= cd_threshold) {
         if (marker) {mapObj.removeLayer(marker)}
