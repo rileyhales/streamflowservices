@@ -137,8 +137,7 @@ showBoundaryLayers();
 let startzoom;
 let bc_threshold = 6;
 let cd_threshold = 8;
-const status_divs = [$("#forecast-status"), $("#historic-status"), $("#flowduration-status"), $("#daily-status")];
-const chart_divs = [$("#forecast-chart"), $("#historic-chart"), $("#flowduration-chart"), $("#daily-chart")];
+const chart_divs = [$("#forecast-chart"), $("#historic-chart"), $("#flowduration-chart"), $("#seasonal-chart")];
 mapObj.on("click", function (event) {
     if (mapObj.getZoom() >= cd_threshold) {
         if (marker) {mapObj.removeLayer(marker)}
@@ -147,20 +146,10 @@ mapObj.on("click", function (event) {
         drain_area = meta[1];
         marker = L.marker(event.latlng).addTo(mapObj);
         marker.bindPopup('<b>Watershed/Region:</b> ' + $("#watersheds_select_input").val() + '<br><b>Reach ID:</b> ' + reachid);
-        needsRefresh = {'ForecastStats': true, 'HistoricSimulation': true, 'FlowDurationCurve': true, 'SeasonalAverage': true};
-
-        for (let i in status_divs) {
-            status_divs[i].html(' (cleared)');
-            status_divs[i].css('color', 'grey');
-        }
-        for (let i in chart_divs) {
-            chart_divs[i].html('')
-        }
+        updateStatusIcons('cleared');
+        for (let i in chart_divs) {chart_divs[i].html('')}
         $("#chart_modal").modal('show');
-        askAPI('ForecastStats');
-        askAPI('HistoricSimulation');
-        askAPI('FlowDurationCurve');
-        askAPI('SeasonalAverage');
+        askAPI();
     }
 });
 mapObj.on("mousemove", function (event) {
@@ -220,55 +209,67 @@ $("#watersheds_select_input").change(function () {
 });
 
 ////////////////////////////////////////////////////////////////////////  GET DATA FROM API
-function askAPI(method) {
+function askAPI() {
     if (!reachid) {return}
-    else if (!needsRefresh[method]) {return}
-    console.log('started ' + method);
-    let div, status, charttab;
-    let table = $("#forecast-table");
-    if (method.includes('Forecast')) {
-        div = $("#forecast-chart");
-        status = $("#forecast-status");
-        charttab = $("#forecast_tab_link");
-        table.html('');
-    } else if (method.includes('Historic')) {
-        div = $("#historical-chart");
-        status = $("#historical-status");
-        charttab = $("#historical_tab_link");
-    } else if (method.includes('FlowDuration')) {
-        div = $("#flowduration-chart");
-        status = $("#flowduration-status");
-        charttab = $("#flow_duration_tab_link");
-    } else if (method.includes('Season')) {
-        div = $("#seasonal-chart");
-        status = $("#seasonal-status");
-        charttab = $("#seasonal_avg_tab_link");
+    updateStatusIcons('load');
+    updateDownloadLinks('clear');
+    for (let i in chart_divs) {
+        chart_divs[i].html('<img src="https://www.ashland.edu/sites/all/themes/ashlandecard/2014card/images/load.gif">');
+        chart_divs[i].css('text-align', 'center');
     }
-    div.html('<img src="https://www.ashland.edu/sites/all/themes/ashlandecard/2014card/images/load.gif">');
-    div.css('text-align', 'center');
-    status.html(' (loading)');
-    status.css('color', 'orange');
-    needsRefresh[method] = false;
     $.ajax({
         type: 'GET',
         async: true,
-        url: '/apps/streamflowservices/query' + L.Util.getParamString({method: method, reach_id: reachid, drain_area: drain_area}),
+        url: '/apps/streamflowservices/query' + L.Util.getParamString({reach_id: reachid, drain_area: drain_area}),
         success: function (html) {
-            console.log('success ' + method);
-            charttab.tab('show');
-            status.html(' (ready)');
-            status.css('color', 'green');
-            div.html(html['plot']);
-            if (typeof(html['table']) != "undefined") {
-                table.html(html['table'])
-            }
+            // forecast tab
+            $("#forecast_tab_link").tab('show');
+            $("#forecast-chart").html(html['fp']);
+            $("#forecast-table").html(html['table']);
+            // historical tab
+            $("#historical_tab_link").tab('show');
+            $("#historical-chart").html(html['hp']);
+            // flow duration tab
+            $("#flow_duration_tab_link").tab('show');
+            $("#flowduration-chart").html(html['fdp']);
+            // seasonal average tab
+            $("#seasonal_avg_tab_link").tab('show');
+            $("#seasonal-chart").html(html['sp']);
+            // update other messages and links
+            $("#forecast_tab_link").tab('show');
+            updateStatusIcons('ready');
+            updateDownloadLinks('set');
         },
         error: function () {
-            console.log('error ' + method);
-            div.html('');
-            status.html(' (failed)');
-            status.css('color', 'red');
-            needsRefresh[method] = true;
+            updateStatusIcons('fail');
+            for (let i in chart_divs) {chart_divs[i].html('')}
         }
     })
+}
+function updateStatusIcons(type) {
+    let statusObj = $("#request-status");
+    if (type === 'load') {
+        statusObj.html(' (loading)');
+        statusObj.css('color', 'orange');
+    } else if (type === 'ready') {
+        statusObj.html(' (ready)');
+        statusObj.css('color', 'green');
+    } else if (type === 'fail') {
+        statusObj.html(' (failed)');
+        statusObj.css('color', 'red');
+    } else if (type === 'cleared') {
+        statusObj.html(' (cleared)');
+        statusObj.css('color', 'grey');
+    }
+}
+function updateDownloadLinks(type) {
+    if (type === 'clear') {
+        $("#download-forecast-btn").attr('href', '');
+        $("#download-historical-btn").attr('href', '');
+        $("#download-seasonal-btn").attr('href', '');
+    } else if (type === 'set') {
+        $("#download-forecast-btn").attr('href', endpoint + 'ForecastStats/?reach_id=' + reachid);
+        $("#download-historical-btn").attr('href', endpoint + 'HistoricSimulation/?reach_id=' + reachid);
+        $("#download-seasonal-btn").attr('href', endpoint + 'SeasonalAverage/?reach_id=' + reachid);
+    }
 }

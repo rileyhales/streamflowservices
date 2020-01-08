@@ -25,13 +25,14 @@
 
   {% if request.path == animation %}
     <li class="title">Map Instructions</li>
+    <li></li>
     <li class="title">Choose the Country to Visualize</li>
-    <li class="active"><a href="">Use dropdown</a></li>
-    <select id='countryList'> </select>
-    <li class="active"><a href="">or Look Country in the Search Box</a></li>
+    <li ><a href="">Use dropdown</a></li>
+    <select id='countryList'></select>
+    <li ><a href="">or Look Country in the Search Box</a></li>
 
     <!--Make sure the form has the autocomplete function switched off:-->
-    <form autocomplete="off" action="/action_page.php">
+    <form autocomplete="off">
       <div class="autocomplete" style="width:300px;">
         <input id="myInput" type="text" name="myCountry" placeholder="Type Country">
       </div>
