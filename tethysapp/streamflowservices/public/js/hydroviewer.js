@@ -148,6 +148,7 @@ mapObj.on("click", function (event) {
         marker.bindPopup('<b>Watershed/Region:</b> ' + $("#watersheds_select_input").val() + '<br><b>Reach ID:</b> ' + reachid);
         updateStatusIcons('cleared');
         for (let i in chart_divs) {chart_divs[i].html('')}
+        $("#forecast-table").html('');
         $("#chart_modal").modal('show');
         askAPI();
     }
@@ -206,6 +207,15 @@ $("#watersheds_select_input").change(function () {
     };
     controlsObj = L.control.layers(basemapObj, ctrllayers).addTo(mapObj);
     mapObj.setMaxZoom(12);
+});
+$("#resize_charts").on('click', function () {
+    let divs = [
+        $("#forecast-chart .js-plotly-plot"), $("#historical-chart .js-plotly-plot"),
+        $("#flowduration-chart .js-plotly-plot"), $("#seasonal-chart .js-plotly-plot")];
+    for (let i in divs) {
+        divs[i].css('height', 500);
+        Plotly.Plots.resize(divs[i][0]);
+    }
 });
 
 ////////////////////////////////////////////////////////////////////////  GET DATA FROM API
