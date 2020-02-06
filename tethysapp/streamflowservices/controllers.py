@@ -44,7 +44,7 @@ def hydroviewer(request):
         'watersheds_select_input': watersheds_select_input,
         'gs_url': url,
         'gs_workspace': workspace,
-        'endpoint': sf.BYU_ENDPOINT,
+        'endpoint': sf.API.byu,
     }
 
     return render(request, 'streamflowservices/hydroviewer.html', context)
@@ -61,11 +61,11 @@ def query(request):
     data = request.GET
     drain_area = data['drain_area']
     reach_id = data['reach_id']
-    stats = sf.forecast_stats(reach_id, endpoint=sf.BYU_ENDPOINT)
-    ensembles = sf.forecast_ensembles(reach_id, endpoint=sf.BYU_ENDPOINT)
-    hist = sf.historic_simulation(reach_id, endpoint=sf.BYU_ENDPOINT)
-    rperiods = sf.return_periods(reach_id, endpoint=sf.BYU_ENDPOINT)
-    daily = sf.seasonal_average(reach_id, endpoint=sf.BYU_ENDPOINT)
+    stats = sf.forecast_stats(reach_id, endpoint=sf.API.byu)
+    ensembles = sf.forecast_ensembles(reach_id, endpoint=sf.API.byu)
+    hist = sf.historic_simulation(reach_id, endpoint=sf.API.byu)
+    rperiods = sf.return_periods(reach_id, endpoint=sf.API.byu)
+    daily = sf.seasonal_average(reach_id, endpoint=sf.API.byu)
     return JsonResponse(dict(
         fp=sf.forecast_plot(stats, rperiods, reach_id=reach_id, drain_area=drain_area, outformat='plotly_html'),
         hp=sf.historical_plot(hist, rperiods, reach_id=reach_id, drain_area=drain_area, outformat='plotly_html'),
