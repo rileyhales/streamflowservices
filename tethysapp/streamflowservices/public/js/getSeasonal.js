@@ -1,10 +1,3 @@
-/**This module only deals with the seasonal data, and it should be good
-to add functions realted to find the sesonal with lat and long as it goes**/
-
-
-//*** REQUIRE LIBRARIES***///
-
-
 //**GLOBAL VARIABLES TO DEAL WITH THE FUNCTIONS**//
 var dates = {highres: [], dates: []};
 var values = {highres: [], max: [], mean: [], min: [], std_dev_range_lower: [], std_dev_range_upper: []};

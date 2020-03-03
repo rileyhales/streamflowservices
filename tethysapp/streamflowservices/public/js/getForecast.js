@@ -1,9 +1,3 @@
-/**This module only deals with the forecast data, and it should be good
-to add functions realted to find the forecast with lat and long as it goes**/
-// import { create, all } from 'mathjs'
-
-
-
 //**GLOBAL VARIABLES TO DEAL WITH THE FUNCTIONS**//
 var dates = {highres: [], dates: []};
 var values = {highres: [], max: [], mean: [], min: [], std_dev_range_lower: [], std_dev_range_upper: []};
@@ -112,9 +106,7 @@ function graph_f (reachid,htmlELement,add, width,height){
              height:height,
              title:'Forecast<br>' + ' Reach ID: ' + reachid,
              xaxis: {title: 'Date'},
-             //yaxis: {title: 'Streamflow m3/s', range: [0, Math.max(...values.max) + Math.max(...values.max)/5]},
              yaxis: {title: 'Streamflow m3/s', range: [0, Math.max(...data[1].y) + Math.max(...data[1].y)/5]},
-             //shapes: returnShapes,
          };
 
          //Removing any exisisting element with the same name//
@@ -137,18 +129,7 @@ function graph_f (reachid,htmlELement,add, width,height){
 
          Plotly.newPlot('graph', data, layout);
          var index = data[0].x.length-1;
-         // index=index.length;
-
-         // console.log("printing indexes");
-         // console.log(data[0].x[0]);
-         // console.log(data[0].x[index]);
-         // for(var i=0; i<data[0].x.length;i++){
-         //   console.log(i);
-         //   console.log(data[0].x[i]);
-         //
-         // };
          returnPeriods.graph_rp(reachid, data[0].x[0], data[0].x[index],width,height);
-         // getreturnperiods(reachid, data[0].x[0], data[0].x[index],width,height);
 
          dates.highres = [], dates.dates = [];
          values.highres = [], values.max = [], values.mean = [], values.min = [], values.std_dev_range_lower = [], values.std_dev_range_upper = [];
@@ -336,18 +317,7 @@ function locationGraph_f (lat,lon,htmlELement,add, width,height){
 
              Plotly.newPlot('graph', data, layout);
              var index = data[0].x.length-1;
-             // index=index.length;
-
-             // console.log("printing indexes");
-             // console.log(data[0].x[0]);
-             // console.log(data[0].x[index]);
-             // for(var i=0; i<data[0].x.length;i++){
-             //   console.log(i);
-             //   console.log(data[0].x[i]);
-             //
-             // };
              returnPeriods.graph_rp(reachid, data[0].x[0], data[0].x[index],width,height);
-             // getreturnperiods(reachid, data[0].x[0], data[0].x[index],width,height);
 
              dates.highres = [], dates.dates = [];
              values.highres = [], values.max = [], values.mean = [], values.min = [], values.std_dev_range_lower = [], values.std_dev_range_upper = [];
@@ -355,4 +325,4 @@ function locationGraph_f (lat,lon,htmlELement,add, width,height){
         });
       }
     });
-};
+}

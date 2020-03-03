@@ -1,10 +1,3 @@
-/**This Module only exports a graph containing historical data,
-it can be added with more functions if neeeded, porobably something great
-will be to have the coordinates of lat long available to makeable to plot a graph.
-**/
-
-
-
 //**GLOBAL VARIABLES TO DEAL WITH THE FUNCTIONS**//
 var dates = {highres: [], dates: []};
 var values = {highres: [], max: [], mean: [], min: [], std_dev_range_lower: [], std_dev_range_upper: []};

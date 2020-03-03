@@ -21,7 +21,6 @@ L.TileLayer.WMFS = L.TileLayer.WMS.extend({
         params[params.version === '1.3.0' ? 'j' : 'y'] = evt.containerPoint.y;
 
         let url = this._url + L.Util.getParamString(params, this._url, true);
-        // console.log(url);
         let reachid = null;
         let drain_area = null;
 
@@ -92,9 +91,10 @@ latlon.onAdd = function () {
     return div;
 };
 function getWatershedComponent(layername) {
+    let region = layername.replace('-boundary','').replace('-catchment','')
     return L.tileLayer.wms(gsURL, {
         version: '1.1.0',
-        layers: gsWRKSP + ':' + layername,
+        layers: 'HS-' + watersheds_hydroshare_ids[region] + ':' + layername + ' ' + layername,
         useCache: true,
         crossOrigin: false,
         format: 'image/png',
@@ -103,9 +103,10 @@ function getWatershedComponent(layername) {
     })
 }
 function getDrainageLine(layername) {
+    let region = layername.replace('-drainageline','');
     return L.tileLayer.WMFS(gsURL, {
         version: '1.1.0',
-        layers: gsWRKSP + ':' + layername,
+        layers: 'HS-' + watersheds_hydroshare_ids[region] + ':' + layername + ' ' + layername,
         useCache: true,
         crossOrigin: false,
         format: 'image/png',
@@ -118,6 +119,7 @@ let drain_area;
 let needsRefresh = {};
 
 let watersheds = JSON.parse($("#map").attr('watersheds'))['list'];
+let watersheds_hydroshare_ids = JSON.parse($("#map").attr('watersheds_hydroshare_ids'));
 let listlayers = [];
 let ctrllayers = {};
 let boundary_layer;

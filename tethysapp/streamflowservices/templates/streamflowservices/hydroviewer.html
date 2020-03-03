@@ -15,7 +15,7 @@
 
 
 {% block app_content %}
-  <div id="map" class="map" watersheds="{{ watersheds }}"></div>
+  <div id="map" class="map" watersheds="{{ watersheds_list }}" watersheds_hydroshare_ids="{{ watersheds_hydroshare_ids }}"></div>
 {% endblock %}
 
 {% block after_app_content %}
@@ -80,15 +80,10 @@
                   <a class="btn btn-success" role="button" id="download-forecast-btn" target="_blank">Download Forecast</a>
                 </div>
 
-                <h6>Download Historical (ERA Interim SImulation) Data</h6>
+                <h6>Download Historical (ERA Interim Simulation) Data</h6>
                 <div id="download_interim" class="btn-group" role="group">
                   <a class="btn btn-info" role="button" id="download-historical-btn" target="_blank">Download Interim Data</a>
                 </div>
-
-{#                <h6>Download Flow Duration Curve</h6>#}
-{#                <div id="download_interim" class="btn-group" role="group">#}
-{#                  <a class="btn btn-warning" role="button" id="download-flowduration-btn" target="_blank">Download Flow Duration</a>#}
-{#                </div>#}
 
                 <h6>Download Seasonal Average Chart</h6>
                 <div id="download_interim" class="btn-group" role="group">
@@ -114,7 +109,7 @@
 
 {% block styles %}
   {{ block.super }}
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.5.1/dist/leaflet.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css">
   <link rel="stylesheet" href="{% static 'streamflowservices/css/hydroviewer.css' %}">
 {% endblock %}
 
@@ -122,10 +117,9 @@
   {{ block.super }}
   <script>
     let gsURL = "{{ gs_url }}";
-    let gsWRKSP = "{{ gs_workspace }}";
     let endpoint = "{{ endpoint }}";
   </script>
-  <script src="https://unpkg.com/leaflet@1.5.1/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"></script>
   <script src="https://unpkg.com/esri-leaflet@2.2.3/dist/esri-leaflet.js"></script>
   <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
   <script type="text/javascript" src="{% static 'streamflowservices/js/hydroviewer.js' %}"></script>

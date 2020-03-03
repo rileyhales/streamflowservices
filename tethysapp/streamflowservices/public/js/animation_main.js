@@ -2,9 +2,6 @@
 
 var basemap="Gray";
 var globalLayer;
-// var stream="7000002";
-// var lat="37.17293431";
-// var long="9.760442195";
 var mapContainer="map";
 var backgroundColor="#000000";
 var countries=["select country","global"];

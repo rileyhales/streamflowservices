@@ -1,10 +1,10 @@
 from tethys_sdk.base import TethysAppBase, url_map_maker
-from tethys_sdk.app_settings import CustomSetting, SpatialDatasetServiceSetting
+from tethys_sdk.app_settings import SpatialDatasetServiceSetting
 
 
 class Streamflowservices(TethysAppBase):
     """
-    Tethys app class for Streamflow Prediction Services.
+    Tethys app class for GEOGloWS ECMWF Streamflow Explorer.
     """
 
     name = 'GEOGloWS ECMWF Streamflow Explorer'
@@ -12,13 +12,16 @@ class Streamflowservices(TethysAppBase):
     icon = 'streamflowservices/images/water.jpg'
     package = 'streamflowservices'
     root_url = 'streamflowservices'
-    color = '#3b8392'
-    description = 'An app for consuming all the services available from the GEOGloWS ECMWF Streamflow Prediction ' \
-                  'service developed at Brigham Young University'
+    color = '#2980b9'
+    description = ''
+    tags = ''
     enable_feedback = False
     feedback_emails = []
 
     def url_maps(self):
+        """
+        Add controllers
+        """
         UrlMap = url_map_maker(self.root_url)
         return (
             # Services page
@@ -41,24 +44,14 @@ class Streamflowservices(TethysAppBase):
             ),
         )
 
-    def custom_settings(self):
-        return (
-            CustomSetting(
-                name='geoserver_workspace',
-                type=CustomSetting.TYPE_STRING,
-                description='Name of the workspace containing the drainage line, catchment, and boundary shapefiles on '
-                            'the GeoServer that you specified in Spatial Dataset Service Settings',
-                required=True,
-            ),
-        )
-
     def spatial_dataset_service_settings(self):
         return (
             SpatialDatasetServiceSetting(
                 name='geoserver',
-                description='GeoServer that will serve the spatial data services for the app',
+                description='The Hydroshare GeoServer: https://geoserver.hydroshare.org/geoserver/rest',
                 engine=SpatialDatasetServiceSetting.GEOSERVER,
                 required=True,
             ),
         )
+
 
