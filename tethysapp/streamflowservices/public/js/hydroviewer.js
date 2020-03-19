@@ -91,7 +91,7 @@ latlon.onAdd = function () {
     return div;
 };
 function getWatershedComponent(layername) {
-    let region = layername.replace('-boundary','').replace('-catchment','')
+    let region = layername.replace('-boundary','').replace('-catchment','');
     return L.tileLayer.wms(gsURL, {
         version: '1.1.0',
         layers: 'HS-' + watersheds_hydroshare_ids[region] + ':' + layername + ' ' + layername,

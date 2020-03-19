@@ -42,9 +42,6 @@ watersheds_hydroshare_IDs = {
 
 
 def hydroviewer(request):
-    url = App.get_spatial_dataset_service('geoserver', as_wms=True)
-    print(url)
-
     watersheds_select_input = SelectInput(
         display_text='Select A Watershed',
         name='watersheds_select_input',
@@ -58,7 +55,7 @@ def hydroviewer(request):
         'watersheds_list': json.dumps({'list': list(watersheds_db)}),
         'watersheds_hydroshare_ids': json.dumps(watersheds_hydroshare_IDs),
         'watersheds_select_input': watersheds_select_input,
-        'gs_url': url,
+        'gs_url': 'https://geoserver.hydroshare.org/geoserver/wms',
         'endpoint': sf.HOSTS.byu,
     }
 

@@ -43,15 +43,3 @@ class Streamflowservices(TethysAppBase):
                 controller='streamflowservices.controllers.query'
             ),
         )
-
-    def spatial_dataset_service_settings(self):
-        return (
-            SpatialDatasetServiceSetting(
-                name='geoserver',
-                description='The Hydroshare GeoServer: https://geoserver.hydroshare.org/geoserver/rest',
-                engine=SpatialDatasetServiceSetting.GEOSERVER,
-                required=True,
-            ),
-        )
-
-
