@@ -72,6 +72,7 @@ function showBoundaryLayers() {
     for (let i = 0; i < watersheds.length; i++) {
         ctrllayers[watersheds[i][0] + ' Boundary'] = getWatershedComponent(watersheds[i][1] + '-boundary').addTo(mapObj);
     }
+    ctrllayers['VIIRS Imagery'] = VIIRSlayer;
     controlsObj = L.control.layers(basemapObj, ctrllayers).addTo(mapObj);
 }
 let legend = L.control({position: 'bottomright'});
@@ -114,6 +115,12 @@ function getDrainageLine(layername) {
         opacity: 1,
     })
 }
+function getVIIRS() {
+    return L.tileLayer('https://floods.ssec.wisc.edu/tiles/RIVER-FLDglobal-composite/{z}/{x}/{y}.png', {
+        layers: 'RIVER-FLDglobal-composite: Latest',
+        crossOrigin: true,
+    });
+}
 let reachid;
 let drain_area;
 let needsRefresh = {};
@@ -128,6 +135,7 @@ let drainage_layer;
 let marker = null;
 ////////////////////////////////////////////////////////////////////////  SETUP THE MAP
 let mapObj = hydroviewer();
+let VIIRSlayer = getVIIRS();
 let basemapObj = basemaps();
 let controlsObj;
 legend.addTo(mapObj);
@@ -206,6 +214,7 @@ $("#watersheds_select_input").change(function () {
         'Watershed Boundary': boundary_layer,
         'Catchment Boundaries': catchment_layer,
         'Drainage Lines': drainage_layer,
+        'VIIRS Imagery': VIIRSlayer,
     };
     controlsObj = L.control.layers(basemapObj, ctrllayers).addTo(mapObj);
     mapObj.setMaxZoom(12);
