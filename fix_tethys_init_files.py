@@ -8,9 +8,9 @@ if __name__ == '__main__':
     if len(sys.argv) == 1:
         print('You did not specify a tethys version so i will assume tethys 3')
         tethysversion = 3
-    elif sys.argv[1] == 2:
+    elif sys.argv[1] == '2':
         tethysversion = 2
-    elif sys.argv[1] == 3:
+    elif sys.argv[1] == '3':
         tethysversion = 3
     else:
         raise Exception('Use 2 or 3 to indicate tethys 2 or tethys 3')
@@ -24,14 +24,16 @@ if __name__ == '__main__':
                 "    __path__ = pkgutil.extend_path(__path__, __name__)\n"
     app_path = os.path.join(os.path.dirname(__file__), 'tethysapp')
     print('working on the directory ' + app_path)
-    app_package_name = [app for app in os.listdir(app_path) if os.path.isdir(os.path.join(app_path, app))][0]
+    app_package_name = [app for app in os.listdir(app_path) if os.path.isdir(os.path.join(app_path, app))]
+    app_package_name.remove('__pycache__')
+    app_package_name = app_package_name[0]
     print('guessing the app name: ' + app_package_name)
 
     init1 = os.path.join(app_path, '__init__.py')
     init2 = os.path.join(app_path, app_package_name, '__init__.py')
 
     if tethysversion == 3:
-        print('tethys version not specified, assuming tethys 3')
+        print('fixing files for tethys3')
         if os.path.exists(init1):
             os.remove(init1)
         with open(init2, 'w') as init:
