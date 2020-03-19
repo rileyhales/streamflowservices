@@ -101,6 +101,7 @@ function getWatershedComponent(layername) {
         format: 'image/png',
         transparent: true,
         opacity: 1,
+        pane: 'watershedlayers',
     })
 }
 function getDrainageLine(layername) {
@@ -113,12 +114,14 @@ function getDrainageLine(layername) {
         format: 'image/png',
         transparent: true,
         opacity: 1,
+        pane: 'watershedlayers',
     })
 }
 function getVIIRS() {
     return L.tileLayer('https://floods.ssec.wisc.edu/tiles/RIVER-FLDglobal-composite/{z}/{x}/{y}.png', {
         layers: 'RIVER-FLDglobal-composite: Latest',
         crossOrigin: true,
+        pane: 'viirs',
     });
 }
 let reachid;
@@ -135,6 +138,10 @@ let drainage_layer;
 let marker = null;
 ////////////////////////////////////////////////////////////////////////  SETUP THE MAP
 let mapObj = hydroviewer();
+mapObj.createPane('watershedlayers');
+mapObj.getPane('watershedlayers').style.zIndex = 250;
+mapObj.createPane('viirs');
+mapObj.getPane('viirs').style.zIndex = 200;
 let VIIRSlayer = getVIIRS();
 let basemapObj = basemaps();
 let controlsObj;
