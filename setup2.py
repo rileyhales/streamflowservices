@@ -2,6 +2,7 @@ import os
 import sys
 from setuptools import setup, find_packages
 from tethys_apps.app_installation import custom_develop_command, custom_install_command
+import fix_tethys_init_files
 
 # -- Apps Definition -- #
 app_package = 'streamflowservices'
@@ -11,6 +12,8 @@ app_package_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'teth
 
 # -- Python Dependencies -- #
 dependencies = []
+
+fix_tethys_init_files.fix_tethys_init_files(2)
 
 setup(
     name=release_package,

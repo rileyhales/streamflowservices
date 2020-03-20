@@ -1,20 +1,8 @@
 import sys
 import os
 
-# arg 1 = tethys version number. That is, 2 or 3 if you want to fix the init.py files for tethys 2 or 3
 
-# -- Fix the __init__.py files -- #
-if __name__ == '__main__':
-    if len(sys.argv) == 1:
-        print('You did not specify a tethys version so i will assume tethys 3')
-        tethysversion = 3
-    elif sys.argv[1] == '2':
-        tethysversion = 2
-    elif sys.argv[1] == '3':
-        tethysversion = 3
-    else:
-        raise Exception('Use 2 or 3 to indicate tethys 2 or tethys 3')
-
+def fix_tethys_init_files(tethysversion=3):
     init_file = "# this is a namespace package\n" \
                 "try:\n" \
                 "    import pkg_resources\n" \
@@ -24,8 +12,7 @@ if __name__ == '__main__':
                 "    __path__ = pkgutil.extend_path(__path__, __name__)\n"
     app_path = os.path.join(os.path.dirname(__file__), 'tethysapp')
     print('working on the directory ' + app_path)
-    app_package_name = [app for app in os.listdir(app_path) if os.path.isdir(os.path.join(app_path, app))]
-    app_package_name.remove('__pycache__')
+    app_package_name = [app for app in os.listdir(app_path) if os.path.exists(os.path.join(app_path, app, 'app.py'))]
     app_package_name = app_package_name[0]
     print('guessing the app name: ' + app_package_name)
 
@@ -45,3 +32,17 @@ if __name__ == '__main__':
             init.write(init_file)
         with open(init2, 'w') as init:
             init.write(init_file)
+
+
+if __name__ == '__main__':
+    # arg 1 = tethys version number. That is, 2 or 3 if you want to fix the init.py files for tethys 2 or 3
+    if len(sys.argv) == 1:
+        print('You did not specify a tethys version so i will assume tethys 3')
+        tethysversion = 3
+    elif sys.argv[1] == '2':
+        tethysversion = 2
+    elif sys.argv[1] == '3':
+        tethysversion = 3
+    else:
+        raise Exception('Use 2 or 3 to indicate tethys 2 or tethys 3')
+    fix_tethys_init_files(tethysversion)
