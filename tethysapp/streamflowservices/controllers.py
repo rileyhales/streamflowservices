@@ -56,7 +56,7 @@ def hydroviewer(request):
         'watersheds_hydroshare_ids': json.dumps(watersheds_hydroshare_IDs),
         'watersheds_select_input': watersheds_select_input,
         'gs_url': 'https://geoserver.hydroshare.org/geoserver/wms',
-        'endpoint': sf.HOSTS.byu,
+        'endpoint': sf.BYU_ENDPOINT,
     }
 
     return render(request, 'streamflowservices/hydroviewer.html', context)
@@ -71,17 +71,26 @@ def animation(request):
 
 def query(request):
     data = request.GET
-    drain_area = data['drain_area']
+    da = data['drain_area']
     reach_id = data['reach_id']
     stats = sf.forecast_stats(reach_id)
-    ensembles = sf.forecast_ensembles(reach_id)
-    hist = sf.historic_simulation(reach_id)
-    rperiods = sf.return_periods(reach_id)
-    daily = sf.seasonal_average(reach_id)
+    rec = sf.forecast_records(reach_id)
+    ens = sf.forecast_ensembles(reach_id)
+    hist_i = sf.historic_simulation(reach_id)
+    hist_5 = sf.historic_simulation(reach_id, forcing='era_5')
+    rper_i = sf.return_periods(reach_id)
+    rper_5 = sf.return_periods(reach_id, forcing='era_5')
+    seas_i = sf.seasonal_average(reach_id)
+    seas_5 = sf.seasonal_average(reach_id, forcing='era_5')
     return JsonResponse(dict(
-        fp=sf.forecast_plot(stats, rperiods, reach_id=reach_id, drain_area=drain_area, outformat='plotly_html'),
-        hp=sf.historical_plot(hist, rperiods, reach_id=reach_id, drain_area=drain_area, outformat='plotly_html'),
-        fdp=sf.flow_duration_curve_plot(hist, reach_id=reach_id, drain_area=drain_area, outformat='plotly_html'),
-        sp=sf.seasonal_plot(daily, reach_id=reach_id, drain_area=drain_area, outformat='plotly_html'),
-        table=sf.probabilities_table(stats, ensembles, rperiods)
+        fp=sf.hydroviewer_plot(rec, stats, rper_i, reach_id=reach_id, drain_area=da, outformat='plotly_html'),
+        hp_i=sf.historical_plot(hist_i, rper_i, reach_id=reach_id, drain_area=da, outformat='plotly_html'),
+        hp_5=sf.historical_plot(hist_5, rper_i, reach_id=reach_id, drain_area=da, outformat='plotly_html'),
+        sp_i=sf.seasonal_plot(seas_i, reach_id=reach_id, drain_area=da, outformat='plotly_html'),
+        sp_5=sf.seasonal_plot(seas_5, reach_id=reach_id, drain_area=da, outformat='plotly_html'),
+        fdp_i=sf.flow_duration_curve_plot(hist_i, reach_id=reach_id, drain_area=da, outformat='plotly_html'),
+        fdp_5=sf.flow_duration_curve_plot(hist_5, reach_id=reach_id, drain_area=da, outformat='plotly_html'),
+        prob_table=sf.probabilities_table(stats, ens, rper_i),
+        rp_int_table=sf.return_periods_table(rper_i),
+        rp_5_table=sf.return_periods_table(rper_5)
     ))

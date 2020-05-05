@@ -1,6 +1,6 @@
 *.pydevproject
 *.project
-*.egg-info
+*.egg-info/
 *.class
 *.pyo
 *.pyc

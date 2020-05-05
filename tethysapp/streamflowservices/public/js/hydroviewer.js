@@ -31,11 +31,8 @@ L.TileLayer.WMFS = L.TileLayer.WMS.extend({
                 url: url,
                 info_format: 'application/json',
                 success: function (data) {
-                    console.log(data.features[0].properties);
                     reachid = data.features[0].properties['COMID'];
                     drain_area = data.features[0].properties['Tot_Drain_'];
-                    console.log(reachid);
-                    console.log(drain_area);
                 }
             });
         }
@@ -46,8 +43,6 @@ L.TileLayer.WMFS = L.TileLayer.WMS.extend({
 L.tileLayer.WMFS = function (url, options) {
     return new L.TileLayer.WMFS(url, options);
 };
-
-
 ////////////////////////////////////////////////////////////////////////  MAP FUNCTIONS AND VARIABLES
 function hydroviewer() {
     return L.map('map', {
@@ -150,11 +145,11 @@ latlon.addTo(mapObj);
 
 showBoundaryLayers();
 
-////////////////////////////////////////////////////////////////////////  EVENT LISTENERS
+////////////////////////////////////////////////////////////////////////  LISTENERS FOR MAP LAYERS
 let startzoom;
 let bc_threshold = 6;
 let cd_threshold = 8;
-const chart_divs = [$("#forecast-chart"), $("#historic-chart"), $("#flowduration-chart"), $("#seasonal-chart")];
+const chart_divs = [$("#forecast-chart"), $("#forecast-table"), $("#historical-int-chart"), $("#historical-int-table"), $("#historical-5-chart"), $("#historical-5-table"), $("#seasonal-int-chart"), $("#seasonal-5-chart"), $("#flowduration-int-chart"), $("#flowduration-5-chart")];
 mapObj.on("click", function (event) {
     if (mapObj.getZoom() >= cd_threshold) {
         if (marker) {mapObj.removeLayer(marker)}
@@ -253,16 +248,21 @@ function askAPI() {
             // forecast tab
             $("#forecast_tab_link").tab('show');
             $("#forecast-chart").html(html['fp']);
-            $("#forecast-table").html(html['table']);
+            $("#forecast-table").html(html['prob_table']);
             // historical tab
             $("#historical_tab_link").tab('show');
-            $("#historical-chart").html(html['hp']);
-            // flow duration tab
-            $("#flow_duration_tab_link").tab('show');
-            $("#flowduration-chart").html(html['fdp']);
+            $("#historical-int-chart").html(html['hp_i']);
+            $("#historical-int-table").html(html['rp_int_table']);
+            $("#historical-5-chart").html(html['hp_5']);
+            $("#historical-5-table").html(html['rp_5_table']);
             // seasonal average tab
             $("#seasonal_avg_tab_link").tab('show');
-            $("#seasonal-chart").html(html['sp']);
+            $("#seasonal-int-chart").html(html['sp_i']);
+            $("#seasonal-5-chart").html(html['sp_5']);
+            // flow duration tab
+            $("#flow_duration_tab_link").tab('show');
+            $("#flowduration-int-chart").html(html['fdp_i']);
+            $("#flowduration-5-chart").html(html['fdp_5']);
             // update other messages and links
             $("#forecast_tab_link").tab('show');
             updateStatusIcons('ready');
@@ -301,3 +301,23 @@ function updateDownloadLinks(type) {
         $("#download-seasonal-btn").attr('href', endpoint + 'SeasonalAverage/?reach_id=' + reachid);
     }
 }
+$("#forecast_tab_link").on('click', function () {
+    $("#download-forecast-btn").show()
+    $("#download-historical-btn").hide()
+    $("#download-seasonal-btn").hide()
+})
+$("#historical_tab_link").on('click', function () {
+    $("#download-forecast-btn").hide()
+    $("#download-historical-btn").show()
+    $("#download-seasonal-btn").hide()
+})
+$("#flow_duration_tab_link").on('click', function () {
+    $("#download-forecast-btn").hide()
+    $("#download-historical-btn").hide()
+    $("#download-seasonal-btn").hide()
+})
+$("#seasonal_avg_tab_link").on('click', function () {
+    $("#download-forecast-btn").hide()
+    $("#download-historical-btn").hide()
+    $("#download-seasonal-btn").show()
+})
