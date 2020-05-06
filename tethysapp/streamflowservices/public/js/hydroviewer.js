@@ -149,7 +149,7 @@ showBoundaryLayers();
 let startzoom;
 let bc_threshold = 6;
 let cd_threshold = 8;
-const chart_divs = [$("#forecast-chart"), $("#forecast-table"), $("#historical-int-chart"), $("#historical-int-table"), $("#historical-5-chart"), $("#historical-5-table"), $("#seasonal-int-chart"), $("#seasonal-5-chart"), $("#flowduration-int-chart"), $("#flowduration-5-chart")];
+const chart_divs = [$("#forecast-chart"), $("#forecast-table"), $("#historical-chart"), $("#historical-table"), $("#seasonal-chart"), $("#flowduration-chart")];
 mapObj.on("click", function (event) {
     if (mapObj.getZoom() >= cd_threshold) {
         if (marker) {mapObj.removeLayer(marker)}
@@ -203,12 +203,10 @@ $("#watersheds_select_input").change(function () {
         mapObj.removeLayer(ctrllayers[i]);
     }
     mapObj.removeControl(controlsObj);
-
     if (waterselect === '') {
         showBoundaryLayers();
         return
     }
-
     boundary_layer = getWatershedComponent(waterselect + '-boundary').addTo(mapObj);
     catchment_layer = getWatershedComponent(waterselect + '-catchment');
     drainage_layer = getDrainageLine(waterselect + '-drainageline');
@@ -221,15 +219,18 @@ $("#watersheds_select_input").change(function () {
     controlsObj = L.control.layers(basemapObj, ctrllayers).addTo(mapObj);
     mapObj.setMaxZoom(12);
 });
-$("#resize_charts").on('click', function () {
+function fix_chart_sizes() {
     let divs = [
-        $("#forecast-chart .js-plotly-plot"), $("#historical-chart .js-plotly-plot"),
-        $("#flowduration-chart .js-plotly-plot"), $("#seasonal-chart .js-plotly-plot")];
+        $("#forecast-chart .js-plotly-plot"), $("#records-chart .js-plotly-plot"),
+        $("#historical-5-chart .js-plotly-plot"), $("#historical-int-chart .js-plotly-plot"),
+        $("#seasonal-5-chart .js-plotly-plot"), $("#seasonal-int-chart .js-plotly-plot"),
+        $("#flowduration-5-chart .js-plotly-plot"), $("#flowduration-int-chart .js-plotly-plot")];
     for (let i in divs) {
         divs[i].css('height', 500);
         Plotly.Plots.resize(divs[i][0]);
     }
-});
+}
+$("#resize_charts").on('click', fix_chart_sizes());
 
 ////////////////////////////////////////////////////////////////////////  GET DATA FROM API
 function askAPI() {
@@ -249,10 +250,13 @@ function askAPI() {
             $("#forecast_tab_link").tab('show');
             $("#forecast-chart").html(html['fp']);
             $("#forecast-table").html(html['prob_table']);
+            // records tab
+            $("#records_tab_link").tab('show');
+            $("#records-chart").html(html['rcp']);
             // historical tab
             $("#historical_tab_link").tab('show');
             $("#historical-int-chart").html(html['hp_i']);
-            $("#historical-int-table").html(html['rp_int_table']);
+            $("#historical-int-table").html(html['rp_i_table']);
             $("#historical-5-chart").html(html['hp_5']);
             $("#historical-5-table").html(html['rp_5_table']);
             // seasonal average tab
@@ -293,31 +297,51 @@ function updateStatusIcons(type) {
 function updateDownloadLinks(type) {
     if (type === 'clear') {
         $("#download-forecast-btn").attr('href', '');
+        $("#download-records-btn").attr('href', '');
         $("#download-historical-btn").attr('href', '');
         $("#download-seasonal-btn").attr('href', '');
     } else if (type === 'set') {
         $("#download-forecast-btn").attr('href', endpoint + 'ForecastStats/?reach_id=' + reachid);
+        $("#download-records-btn").attr('href', endpoint + 'ForecastRecords/?reach_id=' + reachid);
         $("#download-historical-btn").attr('href', endpoint + 'HistoricSimulation/?reach_id=' + reachid);
         $("#download-seasonal-btn").attr('href', endpoint + 'SeasonalAverage/?reach_id=' + reachid);
     }
 }
 $("#forecast_tab_link").on('click', function () {
     $("#download-forecast-btn").show()
+    $("#download-records-btn").hide()
+    $("#download-historical-btn").hide()
+    $("#download-seasonal-btn").hide()
+})
+$("#records_tab_link").on('click', function () {
+    $("#download-forecast-btn").hide()
+    $("#download-records-btn").show()
     $("#download-historical-btn").hide()
     $("#download-seasonal-btn").hide()
 })
 $("#historical_tab_link").on('click', function () {
     $("#download-forecast-btn").hide()
+    $("#download-records-btn").hide()
     $("#download-historical-btn").show()
-    $("#download-seasonal-btn").hide()
-})
-$("#flow_duration_tab_link").on('click', function () {
-    $("#download-forecast-btn").hide()
-    $("#download-historical-btn").hide()
     $("#download-seasonal-btn").hide()
 })
 $("#seasonal_avg_tab_link").on('click', function () {
     $("#download-forecast-btn").hide()
+    $("#download-records-btn").hide()
     $("#download-historical-btn").hide()
     $("#download-seasonal-btn").show()
+})
+$("#flow_duration_tab_link").on('click', function () {
+    $("#download-forecast-btn").hide()
+    $("#download-records-btn").hide()
+    $("#download-historical-btn").hide()
+    $("#download-seasonal-btn").hide()
+})
+$("#toggle_historical").on('click', function () {
+    $("#historical-5").toggle('show');
+    $("#historical-int").toggle('show');
+    $("#seasonal-5-chart").toggle('show');
+    $("#seasonal-int-chart").toggle('show');
+    $("#flowduration-5-chart").toggle('show');
+    $("#flowduration-int-chart").toggle('show');
 })
