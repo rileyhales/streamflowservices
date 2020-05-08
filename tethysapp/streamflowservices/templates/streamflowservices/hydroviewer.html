@@ -84,12 +84,12 @@
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-default" id="toggle_historical">Toggle ERA-5/ERA-Interim</button>
+        <button type="button" class="btn btn-default" id="toggle_historical" style="display: none">Toggle ERA-5/ERA-Interim</button>
         <a class="btn btn-success" role="button" id="download-forecast-btn" target="_blank">Download Forecast</a>
         <a class="btn btn-success" role="button" id="download-records-btn" target="_blank" style="display: none">Download Previous Forecasts</a>
-        <a class="btn btn-success" role="button" id="download-historical-btn" target="_blank" style="display: none">Download Interim Data</a>
+        <a class="btn btn-success" role="button" id="download-historical-btn" target="_blank" style="display: none">Download Historical Data</a>
         <a class="btn btn-success" role="button" id="download-seasonal-btn" target="_blank" style="display: none">Download Seasonal Average</a>
-        <button type="button" class="btn btn-info" id="resize_charts">Resize the Chart</button>
+        <button type="button" class="btn btn-info" id="resize_charts" onclick="fix_chart_sizes('forecasts')">Resize the Chart</button>
         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
       </div>
     </div>

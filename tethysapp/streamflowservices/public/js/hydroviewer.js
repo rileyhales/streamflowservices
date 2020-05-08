@@ -219,36 +219,27 @@ $("#watersheds_select_input").change(function () {
     controlsObj = L.control.layers(basemapObj, ctrllayers).addTo(mapObj);
     mapObj.setMaxZoom(12);
 });
-function fix_chart_sizes() {
-    let divs = [
-        $("#forecast-chart .js-plotly-plot"), $("#records-chart .js-plotly-plot"),
-        $("#historical-5-chart .js-plotly-plot"), $("#historical-int-chart .js-plotly-plot"),
-        $("#seasonal-5-chart .js-plotly-plot"), $("#seasonal-int-chart .js-plotly-plot"),
-        $("#flowduration-5-chart .js-plotly-plot"), $("#flowduration-int-chart .js-plotly-plot")];
-    for (let i in divs) {
-        divs[i].css('height', 500);
-        Plotly.Plots.resize(divs[i][0]);
-    }
-}
-$("#resize_charts").on('click', fix_chart_sizes());
-
 ////////////////////////////////////////////////////////////////////////  GET DATA FROM API
 function askAPI() {
     if (!reachid) {return}
     updateStatusIcons('load');
     updateDownloadLinks('clear');
     for (let i in chart_divs) {
-        chart_divs[i].html('<img src="https://www.ashland.edu/sites/all/themes/ashlandecard/2014card/images/load.gif">');
-        chart_divs[i].css('text-align', 'center');
+        chart_divs[i].html('');
     }
+    let ftl = $("#forecast_tab_link");
+    let fc = $("#forecast-chart");
+    ftl.tab('show')
+    fc.html('<img src="https://www.ashland.edu/sites/all/themes/ashlandecard/2014card/images/load.gif">');
+    fc.css('text-align', 'center');
     $.ajax({
         type: 'GET',
         async: true,
         url: '/apps/streamflowservices/query' + L.Util.getParamString({reach_id: reachid, drain_area: drain_area}),
         success: function (html) {
             // forecast tab
-            $("#forecast_tab_link").tab('show');
-            $("#forecast-chart").html(html['fp']);
+            ftl.tab('show');
+            fc.html(html['fp']);
             $("#forecast-table").html(html['prob_table']);
             // records tab
             $("#records_tab_link").tab('show');
@@ -268,7 +259,7 @@ function askAPI() {
             $("#flowduration-int-chart").html(html['fdp_i']);
             $("#flowduration-5-chart").html(html['fdp_5']);
             // update other messages and links
-            $("#forecast_tab_link").tab('show');
+            ftl.tab('show');
             updateStatusIcons('ready');
             updateDownloadLinks('set');
         },
@@ -307,36 +298,35 @@ function updateDownloadLinks(type) {
         $("#download-seasonal-btn").attr('href', endpoint + 'SeasonalAverage/?reach_id=' + reachid);
     }
 }
-$("#forecast_tab_link").on('click', function () {
-    $("#download-forecast-btn").show()
-    $("#download-records-btn").hide()
-    $("#download-historical-btn").hide()
-    $("#download-seasonal-btn").hide()
-})
-$("#records_tab_link").on('click', function () {
-    $("#download-forecast-btn").hide()
-    $("#download-records-btn").show()
-    $("#download-historical-btn").hide()
-    $("#download-seasonal-btn").hide()
-})
-$("#historical_tab_link").on('click', function () {
-    $("#download-forecast-btn").hide()
-    $("#download-records-btn").hide()
-    $("#download-historical-btn").show()
-    $("#download-seasonal-btn").hide()
-})
-$("#seasonal_avg_tab_link").on('click', function () {
-    $("#download-forecast-btn").hide()
-    $("#download-records-btn").hide()
-    $("#download-historical-btn").hide()
-    $("#download-seasonal-btn").show()
-})
-$("#flow_duration_tab_link").on('click', function () {
-    $("#download-forecast-btn").hide()
-    $("#download-records-btn").hide()
-    $("#download-historical-btn").hide()
-    $("#download-seasonal-btn").hide()
-})
+
+function fix_buttons(tab) {
+    let buttons = [$("#download-forecast-btn"), $("#download-records-btn"), $("#download-historical-btn"), $("#download-seasonal-btn")]
+    for (i in buttons) {buttons[i].hide()}
+    if (tab === 'forecast') {buttons[0].show();$("#toggle_historical").hide()}
+    else if (tab === 'records') {buttons[1].show();$("#toggle_historical").hide()}
+    else if (tab === 'historical') {buttons[2].show();$("#toggle_historical").show()}
+    else if (tab === 'seasonal') {buttons[3].show();$("#toggle_historical").show()}
+    else if (tab === 'flowduration') {$("#toggle_historical").show()}
+    fix_chart_sizes(tab);
+    $("#resize_charts").attr({'onclick': "fix_chart_sizes('" + tab + "')"})
+}
+function fix_chart_sizes(tab) {
+    let divs = [];
+    if (tab === 'forecast') {divs = [$("#forecast-chart .js-plotly-plot")]}
+    else if (tab === 'records') {divs = [$("#records-chart .js-plotly-plot")]}
+    else if (tab === 'historical') {divs = [$("#historical-5-chart .js-plotly-plot"), $("#historical-int-chart .js-plotly-plot")]}
+    else if (tab === 'seasonal') {divs = [$("#seasonal-5-chart .js-plotly-plot"), $("#seasonal-int-chart .js-plotly-plot")];}
+    else if (tab === 'flowduration') {divs = [$("#flowduration-5-chart .js-plotly-plot"), $("#flowduration-int-chart .js-plotly-plot")];}
+    for (let i in divs) {
+        divs[i].css('height', 500);
+        Plotly.Plots.resize(divs[i][0]);
+    }
+}
+$("#forecast_tab_link").on('click', function (){fix_buttons('forecast')})
+$("#records_tab_link").on('click', function (){fix_buttons('records')})
+$("#historical_tab_link").on('click', function (){fix_buttons('historical')})
+$("#seasonal_avg_tab_link").on('click', function (){fix_buttons('seasonal')})
+$("#flow_duration_tab_link").on('click', function (){fix_buttons('flowduration')})
 $("#toggle_historical").on('click', function () {
     $("#historical-5").toggle('show');
     $("#historical-int").toggle('show');
