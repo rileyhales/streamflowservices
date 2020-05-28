@@ -8,10 +8,11 @@ requirements:
   skip: false
   conda:
     channels:
-      geoglows
+      - conda-forge
     packages:
-      geoglows
+      - geoglows
 
   pip:
+    - geoglows
 
 post:

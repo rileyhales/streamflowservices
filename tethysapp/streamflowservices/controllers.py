@@ -1,6 +1,6 @@
 import json
 import os
-import geoglows.streamflow as sf
+import geoglows
 
 from django.shortcuts import render
 from django.http import JsonResponse
@@ -56,7 +56,7 @@ def hydroviewer(request):
         'watersheds_hydroshare_ids': json.dumps(watersheds_hydroshare_IDs),
         'watersheds_select_input': watersheds_select_input,
         'gs_url': 'https://geoserver.hydroshare.org/geoserver/wms',
-        'endpoint': sf.BYU_ENDPOINT,
+        'endpoint': geoglows.streamflow.ENDPOINT,
     }
 
     return render(request, 'streamflowservices/hydroviewer.html', context)
@@ -69,31 +69,31 @@ def animation(request):
     return render(request, 'streamflowservices/animation.html', {'countries': data_dict})
 
 
-
-
+# where the plotting comes from
 def query(request):
     data = request.GET
     da = data['drain_area']
     reach_id = data['reach_id']
-    stats = sf.forecast_stats(reach_id)
-    rec = sf.forecast_records(reach_id)
-    ens = sf.forecast_ensembles(reach_id)
-    hist_5 = sf.historic_simulation(reach_id)
-    hist_i = sf.historic_simulation(reach_id, forcing='era_interim')
-    rper_5 = sf.return_periods(reach_id)
-    rper_i = sf.return_periods(reach_id, forcing='era_interim')
-    seas_5 = sf.seasonal_average(reach_id)
-    seas_i = sf.seasonal_average(reach_id, forcing='era_interim')
+    stats = geoglows.streamflow.forecast_stats(reach_id)
+    rec = geoglows.streamflow.forecast_records(reach_id)
+    ens = geoglows.streamflow.forecast_ensembles(reach_id)
+    hist_5 = geoglows.streamflow.historic_simulation(reach_id)
+    hist_i = geoglows.streamflow.historic_simulation(reach_id, forcing='era_interim')
+    rper_5 = geoglows.streamflow.return_periods(reach_id)
+    rper_i = geoglows.streamflow.return_periods(reach_id, forcing='era_interim')
+    seas_5 = geoglows.streamflow.seasonal_average(reach_id)
+    seas_i = geoglows.streamflow.seasonal_average(reach_id, forcing='era_interim')
+    title_headers = {'Reach ID': reach_id, 'Drainage Area': da}
     return JsonResponse(dict(
-        fp=sf.hydroviewer_plot(rec, stats, rper_5, reach_id=reach_id, drain_area=da, outformat='plotly_html'),
-        rcp=sf.records_plot(rec, rper_5, outformat='plotly_html'),
-        hp_5=sf.historical_plot(hist_5, rper_5, reach_id=reach_id, drain_area=da, outformat='plotly_html'),
-        hp_i=sf.historical_plot(hist_i, rper_i, reach_id=reach_id, drain_area=da, outformat='plotly_html'),
-        sp_5=sf.seasonal_plot(seas_5, reach_id=reach_id, drain_area=da, outformat='plotly_html'),
-        sp_i=sf.seasonal_plot(seas_i, reach_id=reach_id, drain_area=da, outformat='plotly_html'),
-        fdp_5=sf.flow_duration_curve_plot(hist_5, reach_id=reach_id, drain_area=da, outformat='plotly_html'),
-        fdp_i=sf.flow_duration_curve_plot(hist_i, reach_id=reach_id, drain_area=da, outformat='plotly_html'),
-        prob_table=sf.probabilities_table(stats, ens, rper_5),
-        rp_5_table=sf.return_periods_table(rper_5),
-        rp_i_table=sf.return_periods_table(rper_i)
+        fp=geoglows.plots.hydroviewer_plot(rec, stats, ens, rper_5, title_headers=title_headers, outformat='plotly_html'),
+        rcp=geoglows.plots.records_plot(rec, rper_5, outformat='plotly_html'),
+        hp_5=geoglows.plots.historical_plot(hist_5, rper_5, title_headers=title_headers, outformat='plotly_html'),
+        hp_i=geoglows.plots.historical_plot(hist_i, rper_i, title_headers=title_headers, outformat='plotly_html'),
+        sp_5=geoglows.plots.seasonal_plot(seas_5, title_headers=title_headers, outformat='plotly_html'),
+        sp_i=geoglows.plots.seasonal_plot(seas_i, title_headers=title_headers, outformat='plotly_html'),
+        fdp_5=geoglows.plots.flow_duration_curve_plot(hist_5, title_headers=title_headers, outformat='plotly_html'),
+        fdp_i=geoglows.plots.flow_duration_curve_plot(hist_i, title_headers=title_headers, outformat='plotly_html'),
+        prob_table=geoglows.plots.probabilities_table(stats, ens, rper_5),
+        rp_5_table=geoglows.plots.return_periods_table(rper_5),
+        rp_i_table=geoglows.plots.return_periods_table(rper_i)
     ))
