@@ -83,16 +83,16 @@ def query(request):
     rper_i = geoglows.streamflow.return_periods(reach_id, forcing='era_interim')
     seas_5 = geoglows.streamflow.seasonal_average(reach_id)
     seas_i = geoglows.streamflow.seasonal_average(reach_id, forcing='era_interim')
-    title_headers = {'Reach ID': reach_id, 'Drainage Area': da}
+    titles = {'Reach ID': reach_id, 'Drainage Area': da}
     return JsonResponse(dict(
-        fp=geoglows.plots.hydroviewer_plot(rec, stats, ens, rper_5, title_headers=title_headers, outformat='plotly_html'),
-        rcp=geoglows.plots.records_plot(rec, rper_5, outformat='plotly_html'),
-        hp_5=geoglows.plots.historical_plot(hist_5, rper_5, title_headers=title_headers, outformat='plotly_html'),
-        hp_i=geoglows.plots.historical_plot(hist_i, rper_i, title_headers=title_headers, outformat='plotly_html'),
-        sp_5=geoglows.plots.seasonal_plot(seas_5, title_headers=title_headers, outformat='plotly_html'),
-        sp_i=geoglows.plots.seasonal_plot(seas_i, title_headers=title_headers, outformat='plotly_html'),
-        fdp_5=geoglows.plots.flow_duration_curve_plot(hist_5, title_headers=title_headers, outformat='plotly_html'),
-        fdp_i=geoglows.plots.flow_duration_curve_plot(hist_i, title_headers=title_headers, outformat='plotly_html'),
+        fp=geoglows.plots.hydroviewer(rec, stats, ens, rper_5, titles=titles, outformat='plotly_html'),
+        rcp=geoglows.plots.forecast_records(rec, rper_5, outformat='plotly_html'),
+        hp_5=geoglows.plots.historic_simulation(hist_5, rper_5, titles=titles, outformat='plotly_html'),
+        hp_i=geoglows.plots.historic_simulation(hist_i, rper_i, titles=titles, outformat='plotly_html'),
+        sp_5=geoglows.plots.seasonal_average(seas_5, titles=titles, outformat='plotly_html'),
+        sp_i=geoglows.plots.seasonal_average(seas_i, titles=titles, outformat='plotly_html'),
+        fdp_5=geoglows.plots.flow_duration_curve(hist_5, titles=titles, outformat='plotly_html'),
+        fdp_i=geoglows.plots.flow_duration_curve(hist_i, titles=titles, outformat='plotly_html'),
         prob_table=geoglows.plots.probabilities_table(stats, ens, rper_5),
         rp_5_table=geoglows.plots.return_periods_table(rper_5),
         rp_i_table=geoglows.plots.return_periods_table(rper_i)

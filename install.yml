@@ -6,13 +6,12 @@ name: streamflowservices
 requirements:
   # Putting in a skip true param will skip the entire section. Ignoring the option will assume it be set to False
   skip: false
-#  conda:
-#    channels:
-#      - conda-forge
-#    packages:
-#      - geoglows
+  conda:
+    channels:
+      - conda-forge
+    packages:
+      - geoglows>=0.17
 
   pip:
-    - geoglows=0.17
 
 post:
